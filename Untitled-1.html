@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Plataforma de Conscientização SOC - Bahiana</title>
+    <style>
+        /* =======================================================
+           1. ESTILOS BASE E DESIGN VISUAL (CSS)
+           ======================================================= */
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
+        
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background: linear-gradient(-45deg, #115927, #ffffff, #2ecc71, #3498db);
+            background-size: 400% 400%;
+            animation: moverGradiente 15s ease infinite;
+            margin: 0; padding: 0; color: #ffffff; 
+            display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden;
+        }
+
+        @keyframes moverGradiente { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        /* --- TELA DO CADEADO INICIAL --- */
+        #tela-cadeado { text-align: center; cursor: pointer; transition: transform 0.3s ease; }
+        #tela-cadeado:hover { transform: scale(1.1); }
+        .icone-cadeado { font-size: 100px; animation: pulsarCadeado 2s infinite alternate ease-in-out; filter: drop-shadow(0 0 15px rgba(39, 174, 96, 0.6)); }
+        .texto-cadeado { color: #ffffff; font-weight: 900; margin-top: 20px; letter-spacing: 2px; font-size: 18px; text-transform: uppercase; text-shadow: 0 4px 8px rgba(0,0,0,0.8); }
+        @keyframes pulsarCadeado { 0% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(39, 174, 96, 0.4)); } 100% { transform: scale(1.08); filter: drop-shadow(0 0 35px rgba(39, 174, 96, 1)); } }
+        
+        /* --- CAIXAS TRANSPARENTES (LOGIN E CADASTRO) --- */
+        #tela-login, #tela-cadastro { 
+            width: 100%; max-width: 420px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.4); padding: 50px 40px; border-radius: 20px; box-shadow: 0 25px 50px rgba(0,0,0,0.3); 
+            text-align: center; display: none; box-sizing: border-box; animation: surgir 0.6s ease-out;
+        }
+        .logo-login { width: 150px; margin: 0 auto 15px auto; display: block; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); }
+        .titulo-login { font-size: 24px; color: #ffffff; font-weight: 900; margin: 0 auto 20px auto; padding-bottom: 8px; border-bottom: 3px solid #27ae60; display: inline-block; text-shadow: 0 2px 4px rgba(0,0,0,0.3);}
+        .texto-dica { font-size: 13px; color: #ffffff; font-weight: bold; margin-bottom: 25px; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+        .campo-texto { width: 100%; padding: 15px; margin: 8px 0; border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 10px; font-size: 15px; font-family: 'Nunito', sans-serif; background: rgba(255, 255, 255, 0.9); color: #2c3e50; box-sizing: border-box; transition: all 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+        .campo-texto:focus { border-color: #27ae60; box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.4); background: #ffffff; outline: none; }
+        .btn-entrar { background: linear-gradient(to right, #1abc9c, #27ae60); width: 100%; margin-top: 15px; padding: 16px; border: none; border-radius: 10px; cursor: pointer; color: white; font-weight: 900; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 8px 15px rgba(46, 204, 113, 0.3); transition: all 0.3s ease;}
+        .btn-entrar:hover { transform: translateY(-3px); box-shadow: 0 12px 20px rgba(46, 204, 113, 0.5); }
+        .btn-link { background: transparent; border: none; color: #ffffff; width: 100%; margin-top: 20px; font-size: 15px; font-weight: 900; cursor: pointer; font-family: 'Nunito', sans-serif; transition: all 0.3s ease; text-shadow: 0 1px 3px rgba(0,0,0,0.5);}
+        .btn-link:hover { color: #2ecc71; text-decoration: underline; }
+        .mensagem-alerta { font-weight: bold; font-size: 14px; margin-top: 15px; display: none; }
+
+        /* --- BOTOES GERAIS --- */
+        .botao { border: none; cursor: pointer; color: white; font-weight: 800; transition: all 0.3s ease; }
+        .btn-sair { background: rgba(231, 76, 60, 0.2); color: #ff7675; border: 1px solid rgba(231, 76, 60, 0.5); padding: 8px 20px; font-size: 14px; margin-left: 15px; border-radius: 50px; font-weight: bold; backdrop-filter: blur(5px);}
+        .btn-sair:hover { background: #e74c3c; color: white; }
+
+        /* =======================================================
+           LAYOUT: MENU LATERAL E APP
+           ======================================================= */
+        #tela-plataforma { position: absolute; top: 0; left: 0; right: 0; width: 100%; height: 100vh; display: none; flex-direction: row; overflow: hidden; }
+        
+        .menu-lateral { width: 280px; background: rgba(10, 25, 15, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-right: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; padding: 30px 20px; box-shadow: 5px 0 15px rgba(0,0,0,0.3); z-index: 200; overflow-y: auto; overflow-x: hidden; transition: all 0.3s ease; }
+        .menu-lateral.recolhido { width: 0 !important; padding-left: 0 !important; padding-right: 0 !important; opacity: 0; border: none; }
+        .menu-lateral .logo-menu { flex-direction: column; text-align: center; gap: 10px; margin-bottom: 20px; min-width: 240px; }
+        .menu-lateral .logo-menu img { height: 60px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+        
+        .perfil-usuario-lateral { text-align: center; padding-bottom: 20px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); min-width: 240px; }
+        .avatar-container { position: relative; display: inline-block; width: 80px; height: 80px; border-radius: 50%; cursor: pointer; overflow: hidden; border: 2px solid rgba(255,255,255,0.4); box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 10px; background: rgba(255,255,255,0.1); }
+        .avatar-container img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s; font-size: 24px; }
+        .avatar-container:hover .avatar-overlay { opacity: 1; }
+        .nome-usuario-lateral { font-weight: 800; font-size: 1.1em; color: #2ecc71; text-shadow: 0 1px 3px rgba(0,0,0,0.5); word-wrap: break-word; }
+
+        .nav-menu { display: flex; flex-direction: column; gap: 10px; min-width: 240px; }
+        .btn-aba { background: transparent; color: #ffffff; border-radius: 8px; padding: 10px 15px; text-transform: uppercase; font-weight: 800; border: 1px solid transparent; transition: all 0.3s; text-align: left; }
+        .btn-aba.ativa, .btn-aba:hover:not(.bloqueada) { background: rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.4); box-shadow: 0 4px 10px rgba(0,0,0,0.1); padding-left: 20px; }
+
+        .lado-direito { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow-y: auto; }
+        .menu-superior { background: rgba(0, 0, 0, 0.2); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px);}
+        .logo-menu { display: flex; align-items: center; gap: 15px; font-weight: 900; font-size: 1.5em; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
+        .logo-menu img { height: 40px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));}
+        .btn-toggle-menu { background: transparent; border: none; color: white; font-size: 26px; cursor: pointer; margin-right: 15px; transition: 0.3s; padding: 0; display: flex; align-items: center; }
+        .btn-toggle-menu:hover { color: #2ecc71; transform: scale(1.1); }
+        .usuario-info { display: flex; align-items: center; margin-left: auto; }
+        
+        .conteudo-principal { flex: 1; width: 100%; max-width: 1000px; margin: 20px auto 40px auto; padding: 20px; color: #ffffff;}
+        h2, h3 { text-shadow: 0 2px 5px rgba(0,0,0,0.6); }
+        .texto-subtitulo { color: #dcdde1; text-shadow: 0 1px 3px rgba(0,0,0,0.8); margin-top: -10px; font-weight: bold; font-size: 1.1em;}
+
+        .painel { display: none; animation: surgir 0.4s ease-out; }
+        .ativo { display: block; }
+        
+        .barra-status { display: flex; justify-content: space-around; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); color: white; padding: 20px; border-radius: 16px; font-size: 1.2em; margin-bottom: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.3);}
+        #exibir-xp { color: #f1c40f; font-weight: 900; text-shadow: 0 2px 5px rgba(0,0,0,0.5);} 
+        #exibir-vidas { color: #ff7675; font-weight: 900; text-shadow: 0 2px 5px rgba(0,0,0,0.5);} 
+        #exibir-ofensiva { color: #ffa502; font-weight: 900; text-shadow: 0 2px 5px rgba(0,0,0,0.5);}
+
+        /* ÁREA DA MISSÃO */
+        #area-missao { background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); border-left: 5px solid #3498db; border-top: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); padding: 25px; border-radius: 16px; margin-top: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.5);}
+        
+        /* CUSTOMIZADOR DE AVATAR */
+        .grid-avatar { display: grid; grid-template-columns: 350px 1fr; gap: 25px; margin-top: 20px; }
+        @media (max-width: 768px) { .grid-avatar { grid-template-columns: 1fr; } }
+        .caixa-escura { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(10px); padding: 25px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .categoria-avatar { font-size: 1.1em; font-weight: 900; color: #f1c40f; margin-top: 15px; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; grid-column: 1 / -1; }
+        .categoria-avatar:first-child { margin-top: 0; }
+        .grupo-input { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+        .grupo-input label { font-size: 0.85em; font-weight: bold; color: #bdc3c7; text-transform: uppercase; }
+        .select-avatar, .input-cor { width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 0.95em; cursor: pointer; transition: 0.3s; }
+        .select-avatar option { background: #2c3e50; color: white; }
+        .select-avatar:hover, .input-cor:hover { border-color: #2ecc71; background: rgba(255,255,255,0.2); }
+        .input-cor { height: 45px; padding: 2px; }
+        .btn-aleatorio { background: rgba(52, 152, 219, 0.2); border: 1px solid #3498db; width: 100%; padding: 12px; margin-top: 10px; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 1em;}
+        .btn-aleatorio:hover { background: #3498db; }
+        @keyframes animacaoPulo { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
+        .animar-avatar { animation: animacaoPulo 0.3s ease-in-out; }
+
+        /* Resto CSS Mantido */
+        .caixa-soc { background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(15px); padding: 30px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; margin-top: 20px; text-align: left; }
+        th, td { padding: 15px 20px; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        th { background-color: rgba(255,255,255,0.15); color: white; border-radius: 8px; backdrop-filter: blur(5px); }
+        td:first-child { border-radius: 8px 0 0 8px; font-weight: bold; }
+        td:last-child { border-radius: 0 8px 8px 0; }
+        .rodape-app { background: rgba(0, 0, 0, 0.6); width: 100%; padding: 15px 0; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);}
+        .rodape-texto { text-align: center; color: #dcdde1; font-size: 13px; font-weight: bold; }
+        .fundo-progresso { width: 100%; background-color: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; height: 28px; margin: 15px 0; overflow: hidden; box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);}
+        .barra-xp { height: 100%; background: linear-gradient(45deg, #00b09b, #96c93d); width: 0%; text-align: center; color: white; font-weight: 900; line-height: 28px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 10px rgba(0,176,155,0.5); }
+        .grade-conquistas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
+        .cartao-conquista { background: rgba(0,0,0,0.4); padding: 20px 15px; border-radius: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px); filter: grayscale(100%); opacity: 0.5; transition: all 0.4s; }
+        .cartao-conquista.desbloqueada { filter: grayscale(0%); opacity: 1; border-color: rgba(241, 196, 15, 0.8); background: rgba(255,255,255,0.15); box-shadow: 0 10px 20px rgba(241, 196, 15, 0.2); transform: translateY(-3px); }
+        .icone-conquista { font-size: 3em; display: block; margin-bottom: 10px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); }
+        
+        .grade-dicas { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .cartao-dica { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 16px; padding: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); transition: all 0.3s; backdrop-filter: blur(10px); cursor: pointer; }
+        .cartao-dica:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.4); background: rgba(255, 255, 255, 0.1); border-color: rgba(255,255,255,0.5);}
+        .cartao-dica h4 { margin-top: 0; color: #2ecc71; font-size: 1.2em; display: flex; align-items: center; gap: 10px; text-shadow: none;}
+        .cartao-dica p { color: #f1f2f6; font-size: 0.95em; line-height: 1.5; margin-bottom: 0;}
+        
+        .lista-noticias { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        .link-noticia { text-decoration: none; color: inherit; display: block; }
+        .item-noticia { background: rgba(0, 0, 0, 0.5); border-left: 4px solid #3498db; border-radius: 8px 16px 16px 8px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: all 0.3s; backdrop-filter: blur(10px); display: flex; flex-direction: column; border-top: 1px solid rgba(255,255,255,0.05); border-right: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer;}
+        .item-noticia:hover { transform: translateX(8px); background: rgba(255, 255, 255, 0.15); border-left-color: #2ecc71; }
+        .data-noticia { font-size: 0.8em; color: #bdc3c7; font-weight: 800; text-transform: uppercase; margin-bottom: 5px;}
+        .titulo-noticia { font-size: 1.1em; color: #ffffff; font-weight: 800; margin: 0 0 5px 0;}
+        .resumo-noticia { font-size: 0.95em; color: #dcdde1; margin: 0;}
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 9999; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.ativo { display: flex; opacity: 1; }
+        .modal-conteudo { background: rgba(255,255,255,0.15); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 30px; max-width: 500px; width: 90%; text-align: center; position: relative; transform: scale(0.8); transition: transform 0.3s ease; box-shadow: 0 25px 50px rgba(0,0,0,0.6); color: white; }
+        .modal-overlay.ativo .modal-conteudo { transform: scale(1); }
+        .modal-imagem { width: 100%; height: 220px; object-fit: cover; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);}
+        .modal-fechar { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; font-size: 1.2em; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; transition: 0.3s; }
+        .modal-fechar:hover { background: #ff7675; }
+
+        /* =======================================================
+           ESTILOS DO CERTIFICADO E IMPRESSÃO (INJETADO)
+           ======================================================= */
+        .modal-certificado { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 10000; flex-direction: column; overflow-y: auto; padding: 20px; opacity: 0; transition: opacity 0.4s;}
+        .modal-certificado.ativo { display: flex; opacity: 1; }
+        .certificado-box { background: white; color: #2c3e50; padding: 60px; border: 15px solid #115927; border-radius: 10px; text-align: center; max-width: 800px; width: 100%; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5); transform: scale(0.8); transition: transform 0.4s ease; }
+        .modal-certificado.ativo .certificado-box { transform: scale(1); }
+        .cert-logo { height: 100px; margin-bottom: 20px; }
+        .cert-titulo { font-size: 3em; margin: 0; color: #115927; font-family: serif; text-transform: uppercase; letter-spacing: 2px;}
+        .cert-texto { font-size: 1.4em; margin: 25px 0; color: #34495e; }
+        .cert-nome { font-size: 2.8em; color: #27ae60; border-bottom: 2px solid #bdc3c7; padding-bottom: 10px; margin: 10px 0; display: inline-block; min-width: 60%; font-weight: 900;}
+        .cert-footer { display: flex; justify-content: space-around; margin-top: 40px; border-top: 2px solid #ecf0f1; padding-top: 20px; }
+        .cert-info p { margin: 5px 0; font-size: 1.2em; color: #7f8c8d; }
+        .cert-info strong { font-size: 1.8em; color: #f39c12; }
+        
+        @media print {
+            body * { visibility: hidden; }
+            .modal-certificado { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: white; padding: 0; display: block !important; }
+            .certificado-box { box-shadow: none; border: 15px solid #115927; width: 100%; max-width: 100%; margin: 0; padding: 40px; visibility: visible; transform: scale(1); }
+            .certificado-box * { visibility: visible; }
+            .botoes-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="tela-cadeado" onclick="destrancarPlataforma()"><div class="icone-cadeado">🔒</div><div class="texto-cadeado">Clique para Acessar</div></div>
+
+    <div id="tela-login">
+        <img src="ebmsp-escola-bahiana-de-medicina-e-saude-publica.png" alt="Logo Bahiana" class="logo-login">
+        <h2 class="titulo-login">Acesso Seguro</h2>
+        <p class="texto-dica">Utilize <strong>soc@</strong> no e-mail para acesso Gestor.</p>
+        <input type="email" id="input-email" class="campo-texto" placeholder="E-mail institucional" onkeypress="if(event.key === 'Enter') acessarSistema()">
+        <input type="password" id="input-senha" class="campo-texto" placeholder="Sua Senha" onkeypress="if(event.key === 'Enter') acessarSistema()">
+        <button class="btn-entrar" onclick="acessarSistema()">ENTRAR NO SISTEMA</button>
+        <button class="btn-link" onclick="mostrarTelaCadastro()">Criar nova conta</button>
+        <p id="mensagem-login" class="mensagem-alerta"></p>
+    </div>
+
+    <div id="tela-cadastro">
+        <img src="ebmsp-escola-bahiana-de-medicina-e-saude-publica.png" alt="Logo Bahiana" class="logo-login">
+        <h2 class="titulo-login">Novo Cadastro</h2>
+        <p class="texto-dica">Insira seus dados institucionais.</p>
+        <input type="email" id="input-email-cad" class="campo-texto" placeholder="E-mail institucional">
+        <input type="text" id="input-matricula-cad" class="campo-texto" placeholder="Nº de Matrícula">
+        <input type="password" id="input-senha-cad" class="campo-texto" placeholder="Crie sua Senha (mín. 8 caracteres)">
+        <button class="btn-entrar" onclick="realizarCadastro()">REGISTRAR CONTA</button>
+        <button class="btn-link" onclick="mostrarTelaLogin()">Já tenho conta (Fazer Login)</button>
+        <p id="mensagem-cadastro" class="mensagem-alerta"></p>
+    </div>
+
+    <div id="tela-plataforma">
+        
+        <aside id="menu-lateral" class="menu-lateral" style="display: none;">
+            <div class="logo-menu">
+                <img src="ebmsp-escola-bahiana-de-medicina-e-saude-publica.png" alt="Logo">
+                <span id="nome-plataforma-lateral">SOC Education</span>
+            </div>
+
+            <div class="perfil-usuario-lateral">
+                <label for="upload-avatar" class="avatar-container" title="Clique para alterar a foto (Upload)">
+                    <img id="avatar-img" src="https://ui-avatars.com/api/?name=U&background=2ecc71&color=fff&size=100" alt="Avatar do Usuário">
+                    <div class="avatar-overlay">📷</div>
+                </label>
+                <input type="file" id="upload-avatar" accept="image/*" style="display: none;" onchange="alterarAvatar(event)">
+                <div id="nome-usuario-lateral" class="nome-usuario-lateral">Usuário</div>
+                <div id="escudo-menu-lateral" style="margin-top: 5px;"></div>
+            </div>
+            
+            <nav id="menu-colaborador" class="nav-menu">
+                <button id="btn-aba-missoes" class="btn-aba ativa" onclick="alternarAbaColaborador('missoes'); toggleSubmenuFases()">🎮 Game / Missões</button>
+                
+                <div id="submenu-fases" style="display: none; flex-direction: column; gap: 8px; margin-left: 20px; margin-bottom: 10px;">
+                    <button id="menu-lat-Phishing" class="btn-aba" style="font-size: 0.85em; padding: 8px 15px; text-transform: none; background: rgba(255,255,255,0.05);" onclick="iniciarMissaoMenu('Phishing')">🎣 Phishing (0/10)</button>
+                    <button id="menu-lat-Senhas" class="btn-aba bloqueada" style="font-size: 0.85em; padding: 8px 15px; text-transform: none; color: #7f8c8d; background: rgba(0,0,0,0.2); cursor: not-allowed;" onclick="iniciarMissaoMenu('Senhas')">🔒 Credenciais (0/10)</button>
+                    <button id="menu-lat-LGPD" class="btn-aba bloqueada" style="font-size: 0.85em; padding: 8px 15px; text-transform: none; color: #7f8c8d; background: rgba(0,0,0,0.2); cursor: not-allowed;" onclick="iniciarMissaoMenu('LGPD')">🔒 LGPD (0/10)</button>
+                    <button id="menu-lat-Redes" class="btn-aba bloqueada" style="font-size: 0.85em; padding: 8px 15px; text-transform: none; color: #7f8c8d; background: rgba(0,0,0,0.2); cursor: not-allowed;" onclick="iniciarMissaoMenu('Redes')">🔒 Redes Wi-Fi (0/10)</button>
+                </div>
+
+                <button id="btn-aba-progresso" class="btn-aba" onclick="alternarAbaColaborador('progresso')">📊 Progresso</button>
+                <button id="btn-aba-dicas" class="btn-aba" onclick="alternarAbaColaborador('dicas')">💡 Dicas</button>
+                <button id="btn-aba-noticias" class="btn-aba" onclick="alternarAbaColaborador('noticias')">📰 Notícias</button>
+                <button id="btn-aba-avatar" class="btn-aba" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.2); border-radius: 0; color: #f1c40f;" onclick="alternarAbaColaborador('avatar')">🧑‍🎨 Customizar Avatar</button>
+            </nav>
+        </aside>
+
+        <div class="lado-direito">
+            <header class="menu-superior">
+                <div style="display: flex; align-items: center;">
+                    <button id="btn-toggle-sidebar" class="btn-toggle-menu" style="display: none;" onclick="toggleSidebar()">☰</button>
+                    <div class="logo-menu" id="logo-header-soc"><img src="ebmsp-escola-bahiana-de-medicina-e-saude-publica.png" alt="Logo"><span id="nome-plataforma-superior">SOC Education</span></div>
+                </div>
+                
+                <div class="usuario-info">
+                    <span style="font-weight: 700; color: #ffffff; margin-right: 15px;">Olá, <strong id="nome-usuario-logado" style="color: #2ecc71; text-shadow: 0 0 5px rgba(46,204,113,0.5);">Usuário</strong></span>
+                    <button class="btn-sair" onclick="sairDoSistema()">Sair</button>
+                </div>
+            </header>
+            
+            <main class="conteudo-principal">
+                
+                <div id="painel-colaborador" class="painel">
+                    <div class="barra-status">
+                        <span id="exibir-xp">🏆 0 XP</span>
+                        <span id="exibir-vidas">❤️ 3 Escudos</span>
+                        <span id="exibir-ofensiva">🔥 1 Dia</span>
+                    </div>
+                    
+                    <div id="aba-missoes" style="display: block;">
+                        <h2>Missões de Treinamento</h2>
+                        <p class="texto-subtitulo" id="texto-intro-missao">Complete 10 perguntas em cada trilha para desbloquear a próxima fase.</p>
+                        
+                        <div id="area-missao" style="display: block; text-align: center;">
+                            <p style="color: #dcdde1; font-size: 1.2em; margin-top: 40px;">👈 Selecione uma fase no menu lateral para iniciar sua missão.</p>
+                        </div>
+                    </div>
+
+                    <div id="aba-progresso" style="display: none;"><h2>Sua Jornada</h2><h3 style="font-weight: normal;">Nível: <strong id="titulo-nivel" style="color:#2ecc71;">Estagiário</strong></h3><div class="fundo-progresso"><div id="barra-progresso-xp" class="barra-xp">0%</div></div><h3 style="margin-top: 30px;">Medalhas</h3><div class="grade-conquistas" id="area-conquistas"></div></div>
+                    
+                    <div id="aba-dicas" style="display: none;">
+                        <h2>Manual de Sobrevivência Digital</h2>
+                        <p class="texto-subtitulo">Aplique estas práticas no seu dia a dia na Bahiana. Clique para expandir.</p>
+                        <div class="grade-dicas">
+                            <div class="cartao-dica" onclick="abrirModalDica('🔒 A Regra da Tela Bloqueada', 'Sempre que sair da sua mesa, mesmo que seja para pegar um café rápido, pressione &lt;strong&gt;Windows + L&lt;/strong&gt; (ou Control + Cmd + Q no Mac) para bloquear seu computador. Isso impede que pessoas não autorizadas acessem seus dados ou enviem e-mails em seu nome.', 'https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=600')">
+                                <h4>🔒 A Regra da Tela Bloqueada</h4><p>Sempre que sair da sua mesa, pressione <strong>Windows + L</strong>.</p>
+                            </div>
+                            <div class="cartao-dica" onclick="abrirModalDica('🔑 Senhas como Escovas de Dente', 'Não as compartilhe com ninguém e troque-as regularmente! Use sempre frases longas em vez de palavras simples. Considere usar um gerenciador de senhas para facilitar a sua vida corporativa.', 'https://images.pexels.com/photos/2880507/pexels-photo-2880507.jpeg?auto=compress&cs=tinysrgb&w=600')">
+                                <h4>🔑 Senhas como Escovas de Dente</h4><p>Não as compartilhe com ninguém e troque-as regularmente!</p>
+                            </div>
+                            <div class="cartao-dica" onclick="abrirModalDica('🎣 Desconfie do &quot;Urgente&quot;', 'E-mails pedindo senhas, dados bancários ou que exijam &quot;ação imediata sob pena de bloqueio&quot; são quase sempre ataques de Phishing. Na dúvida, não clique em links e contate imediatamente o suporte de TI.', 'https://images.pexels.com/photos/5380664/pexels-photo-5380664.jpeg?auto=compress&cs=tinysrgb&w=600')">
+                                <h4>🎣 Desconfie do "Urgente"</h4><p>E-mails pedindo senhas ou que exijam "ação imediata" são quase sempre ataques.</p>
+                            </div>
+                            <div class="cartao-dica" onclick="abrirModalDica('📱 Cuidado com Pen Drives', 'Nunca conecte um Pen Drive achado no chão ou de origem desconhecida no seu computador corporativo. Eles podem conter malwares invisíveis configurados para infectar a rede da empresa instantaneamente.', 'https://images.pexels.com/photos/11772620/pexels-photo-11772620.jpeg?auto=compress&cs=tinysrgb&w=600')">
+                                <h4>📱 Cuidado com Pen Drives</h4><p>Nunca conecte um Pen Drive achado no chão no seu computador corporativo.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="aba-noticias" style="display: none;"><h2>Radar de Cibersegurança</h2><p class="texto-subtitulo">Últimas notícias do mundo da InfoSec, direto da Microsoft.</p><div class="lista-noticias"><p style="text-align: center; color: #3498db; font-weight: bold; margin-top: 30px;"><span style="font-size: 24px;">📡</span><br>Buscando as últimas notícias em tempo real...</p></div></div>
+
+                    <div id="aba-avatar" style="display: none;">
+                        <h2>Laboratório de Agentes SOC</h2>
+                        <p class="texto-subtitulo">Crie a sua identidade visual e configure o seu escudo de defesa corporativa.</p>
+                        
+                        <div class="grid-avatar">
+                            <div class="caixa-escura" style="text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                <div style="position: relative; width: 180px; height: 180px; margin-bottom: 20px;">
+                                    <img id="preview-avatar-api" src="" style="width: 100%; height: 100%; border-radius: 50%; border: 4px solid #2ecc71; background: transparent; z-index: 2; position: relative;">
+                                    
+                                    <div id="preview-escudo-box" style="position: absolute; bottom: -10px; right: -15px; z-index: 3;">
+                                        <svg id="preview-escudo-svg" viewBox="0 0 24 24" width="60" height="60" style="filter: drop-shadow(0px 4px 5px rgba(0,0,0,0.6));">
+                                            <path id="preview-escudo-path" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" fill="#f1c40f"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <button class="btn-entrar" style="width: 100%; padding: 14px; margin-top: 10px;" onclick="salvarAvatarNoMenu()">💾 Salvar Identidade</button>
+                                <button class="btn-aleatorio" onclick="gerarAvatarAleatorio()">🎲 Gerar Aleatório</button>
+                            </div>
+
+                            <div class="caixa-escura" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-content: start;">
+                                <div class="categoria-avatar">👤 Corpo & Rosto</div>
+                                
+                                <div class="grupo-input">
+                                    <label>Cor da Pele</label>
+                                    <select id="av-skin" class="select-avatar" onchange="atualizarAvatar()">
+                                        <option value="f8d25c">Amarelo (Padrão)</option>
+                                        <option value="ffdbb4">Claro</option>
+                                        <option value="edb98a">Médio</option>
+                                        <option value="d08b5b">Moreno</option>
+                                        <option value="ae5d29">Escuro</option>
+                                        <option value="614335">Negro</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="grupo-input">
+                                    <label>Olhos (Expressão)</label>
+                                    <select id="av-eyes" class="select-avatar" onchange="atualizarAvatar()">
+                                        <option value="default">Padrão</option>
+                                        <option value="happy">Feliz</option>
+                                        <option value="surprised">Surpreso</option>
+                                        <option value="wink">Piscando</option>
+                                        <option value="squint">Focado</option>
+                                    </select>
+                                </div>
+
+                                <div class="grupo-input">
+                                    <label>Boca</label>
+                                    <select id="av-mouth" class="select-avatar" onchange="atualizarAvatar()">
+                                        <option value="default">Padrão</option>
+                                        <option value="smile">Sorridente</option>
+                                        <option value="sad">Triste</option>
+                                        <option value="serious">Sério</option>
+                                        <option value="twinkle">Brincalhão</option>
+                                    </select>
+                                </div>
+
+                                <div class="categoria-avatar" style="margin-top: 10px;">👕 Estilo</div>
+
+                                <div class="grupo-input">
+                                    <label>Cabelo / Cabeça</label>
+                                    <select id="av-hair" class="select-avatar" onchange="atualizarAvatar()">
+                                        <option value="shortHairShortFlat">Curto Liso</option>
+                                        <option value="shortHairShortWaved">Curto Ondulado</option>
+                                        <option value="shortHairDreads01">Dreads</option>
+                                        <option value="longHairStraight">Longo Liso</option>
+                                        <option value="longHairCurly">Longo Cacheado</option>
+                                        <option value="hijab">Hijab</option>
+                                        <option value="turban">Turbante</option>
+                                    </select>
+                                </div>
+
+                                <div class="grupo-input">
+                                    <label>Cor do Cabelo</label>
+                                    <select id="av-hairColor" class="select-avatar" onchange="atualizarAvatar()">
+                                        <option value="2c1b18">Preto</option>
+                                        <option value="4a3123">Castanho Escuro</option>
+                                        <option value="b58143">Castanho Claro</option>
+                                        <option value="d6b370">Loiro</option>
+                                        <option value="c93305">Ruivo</option>
+                                        <option value="e8e1e1">Grisalho</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="grupo-input">
+                                    <label>Barba / Bigode</label>
+                                    <select id="av-facialHair" class="select-avatar" onchange="atualizarAvatar()">
+                                        <option value="none">Nenhum</option>
+                                        <option value="beardMedium">Barba Média</option>
+                                        <option value="beardLight">Barba Rala</option>
+                                        <option value="moustacheMagnum">Bigode Clássico</option>
+                                    </select>
+                                </div>
+
+                                <div class="grupo-input">
+                                    <label>Roupa</label>
+                                    <select id="av-clothes" class="select-avatar" onchange="atualizarAvatar()">
+                                        <option value="blazerAndShirt">Blazer e Camisa</option>
+                                        <option value="hoodie">Moletom</option>
+                                        <option value="shirtCrewNeck">T-Shirt Simples</option>
+                                        <option value="overall">Macacão</option>
+                                    </select>
+                                </div>
+
+                                <div class="grupo-input" style="grid-column: 1 / -1;">
+                                    <label>Acessórios</label>
+                                    <select id="av-accessories" class="select-avatar" onchange="atualizarAvatar()">
+                                        <option value="none">Nenhum</option>
+                                        <option value="prescription02">Óculos de Leitura</option>
+                                        <option value="sunglasses">Óculos Escuros</option>
+                                        <option value="round">Óculos Redondos</option>
+                                    </select>
+                                </div>
+
+                                <div class="categoria-avatar" style="margin-top: 10px;">🛡️ Equipamento SOC</div>
+
+                                <div class="grupo-input">
+                                    <label>Modelo do Escudo</label>
+                                    <select id="av-shieldShape" class="select-avatar" onchange="atualizarAvatar()">
+                                        <option value="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z">🛡️ Defesa Clássica</option>
+                                        <option value="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5">📚 Acadêmico</option>
+                                        <option value="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z">✅ Verificado SOC</option>
+                                    </select>
+                                </div>
+
+                                <div class="grupo-input">
+                                    <label>Cor do Escudo</label>
+                                    <input type="color" id="av-shieldColor" class="input-cor" value="#3498db" onchange="atualizarAvatar()">
+                                </div>
+
+                            </div>
+                        </div>
+                    </div> </div>
+
+                <div id="painel-soc" class="painel caixa-soc"><h2>🛡️ Dashboard do SOC</h2><p class="texto-subtitulo">Visão administrativa de desempenho.</p><table id="tabela-ranking"><thead><tr><th>Posição</th><th>Colaborador</th><th>Pontos</th></tr></thead><tbody id="corpo-ranking"></tbody></table></div>
+            </main>
+            <footer class="rodape-app"><div class="rodape-texto">&copy; 2026 Escola Bahiana de Medicina e Saúde Pública - Divisão de Segurança da Informação</div></footer>
+        </div>
+    </div>
+
+    <div id="modal-dica" class="modal-overlay" onclick="fecharModalDica(event)">
+        <div class="modal-conteudo">
+            <button class="modal-fechar" onclick="fecharModalDica(event)">✖</button>
+            <img id="modal-imagem" src="" alt="Imagem da Dica" class="modal-imagem">
+            <h3 id="modal-titulo" style="color: #2ecc71; margin-top: 0;">Título</h3>
+            <p id="modal-texto" style="font-size: 1.05em; line-height: 1.6; color: #f1f2f6;">Texto detalhado da dica...</p>
+        </div>
+    </div>
+
+    <div id="modal-certificado" class="modal-certificado">
+        <div class="certificado-box" id="area-impressao-certificado">
+            <img src="ebmsp-escola-bahiana-de-medicina-e-saude-publica.webp" alt="Logo Bahiana" class="cert-logo">
+            <h1 class="cert-titulo">Certificado</h1>
+            <p class="cert-texto">Certificamos que</p>
+            <h2 class="cert-nome" id="cert-nome">NOME DO USUÁRIO</h2>
+            <p class="cert-texto">concluiu com êxito o <strong>Treinamento de Conscientização em Segurança da Informação (SOC)</strong>, alcançando a taxa de acertos exigida nas práticas de defesa cibernética corporativa.</p>
+            <div class="cert-footer">
+                <div class="cert-info">
+                    <strong>Aproveitamento</strong>
+                    <p id="cert-taxa">0%</p>
+                </div>
+                <div class="cert-info">
+                    <strong>Data de Emissão</strong>
+                    <p id="cert-data">00/00/0000</p>
+                </div>
+            </div>
+        </div>
+        <div class="botoes-print" style="margin-top: 25px; display: flex; gap: 20px;">
+            <button class="btn-entrar" style="margin: 0; width: auto; padding: 15px 30px; font-size: 1.1em;" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+            <button class="btn-sair" style="margin: 0; padding: 15px 30px; font-size: 1.1em; border-radius: 10px; background: #e74c3c; color: white;" onclick="fecharCertificado()">✖ Fechar</button>
+        </div>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+    function lancarConfetes() { if(typeof confetti !== 'undefined') confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } }); }
+    function destrancarPlataforma() { document.getElementById('tela-cadeado').style.display = 'none'; document.getElementById('tela-login').style.display = 'block'; }
+    function mostrarTelaCadastro() { document.getElementById('tela-login').style.display = 'none'; document.getElementById('tela-cadastro').style.display = 'block'; document.getElementById('mensagem-cadastro').style.display = 'none'; }
+    function mostrarTelaLogin() { document.getElementById('tela-cadastro').style.display = 'none'; document.getElementById('tela-login').style.display = 'block'; document.getElementById('mensagem-login').style.display = 'none'; }
+
+    function realizarCadastro() {
+        const email = document.getElementById('input-email-cad').value.trim().toLowerCase();
+        const matricula = document.getElementById('input-matricula-cad').value.trim();
+        const senha = document.getElementById('input-senha-cad').value;
+        const msg = document.getElementById('mensagem-cadastro');
+
+        if (email === "" || matricula === "" || senha === "") {
+            msg.style.color = "#ff7675"; msg.innerText = "Por favor, preencha todos os campos!"; msg.style.display = "block"; return;
+        }
+
+        if (!email.endsWith('@bahiana.edu.br')) {
+            msg.style.color = "#ff7675"; msg.innerText = "Utilize um e-mail com domínio @bahiana.edu.br!"; msg.style.display = "block"; return;
+        }
+
+        if (senha.length < 8) {
+            msg.style.color = "#ff7675"; msg.innerText = "A senha é muito fraca. Utilize no mínimo 8 caracteres!"; msg.style.display = "block"; return;
+        }
+
+        msg.style.color = "#2ecc71"; msg.innerText = "Conta corporativa criada com sucesso! Redirecionando..."; msg.style.display = "block";
+        document.getElementById('input-email-cad').value = ""; document.getElementById('input-matricula-cad').value = ""; document.getElementById('input-senha-cad').value = "";
+        setTimeout(mostrarTelaLogin, 2000);
+    }
+
+    const InfraBaseDados = {
+        colaboradorAtual: { nome: "Usuário", xp: 0, vidas: 3, sequenciaDias: 0, ultimoAcesso: null, progresso: { Phishing: 0, Senhas: 0, LGPD: 0, Redes: 0 }, questoesRespondidas: 0 },
+        conquistas: [{ id: 1, nome: "Novato", icone: "🛡️", xpNecessario: 50, d: "Iniciou." },{ id: 2, nome: "Defensor", icone: "🕵️", xpNecessario: 200, d: "200 XP." },{ id: 3, nome: "Mestre", icone: "📜", xpNecessario: 500, d: "500 XP." }],
+        salvarProgresso: function() {
+            let r = JSON.parse(localStorage.getItem('rankingEmpresa')) || [{ nome: "tiago.souza", xp: 150 }, { nome: "maria.silva", xp: 90 }];
+            const i = r.findIndex(c => c.nome === this.colaboradorAtual.nome);
+            if (i > -1) { r[i].xp = this.colaboradorAtual.xp; } else { r.push({ nome: this.colaboradorAtual.nome, xp: this.colaboradorAtual.xp }); }
+            localStorage.setItem('rankingEmpresa', JSON.stringify(r));
+        },
+        obterRanking: function() { return JSON.parse(localStorage.getItem('rankingEmpresa')) || []; }
+    };
+
+    const ModuloGamificacao = {
+        calcularXPExponencial: function(n) { return Math.floor(50 * Math.pow(n, 1.5)); },
+        atualizarSequenciaDiaria: function() {
+            const hoje = new Date(); hoje.setHours(0,0,0,0);  
+            if (!InfraBaseDados.colaboradorAtual.ultimoAcesso) { InfraBaseDados.colaboradorAtual.sequenciaDias = 1; InfraBaseDados.colaboradorAtual.ultimoAcesso = hoje.toISOString(); return; }
+            const dU = new Date(InfraBaseDados.colaboradorAtual.ultimoAcesso); dU.setHours(0,0,0,0);
+            const diff = (hoje.getTime() - dU.getTime()) / (1000 * 3600 * 24);
+            if (diff === 1) InfraBaseDados.colaboradorAtual.sequenciaDias += 1; else if (diff > 1) InfraBaseDados.colaboradorAtual.sequenciaDias = 1; 
+            InfraBaseDados.colaboradorAtual.ultimoAcesso = hoje.toISOString();
+        },calcularNivelAtual: function(xp) {
+            const ns = [ { t: "Estagiário", m: 100 }, { t: "Júnior", m: 300 }, { t: "CISO", m: 9999 } ];
+            let nA = ns[0]; let mP = ns[0].m;
+            for (let i = 0; i < ns.length; i++) { if (xp >= ns[i].m && i < ns.length - 1) { nA = ns[i + 1]; mP = ns[i + 1].m; } }
+            let p = mP === 9999 ? 100 : Math.floor((xp / mP) * 100);
+            return { titulo: nA.t, meta: mP, porcentagem: p > 100 ? 100 : p };
+        }
+    };
+
+    // =======================================================
+    // BANCO DE DADOS ESTÁTICO DE PERGUNTAS (Substitui IA)
+    // =======================================================
+    const BancoDePerguntas = {
+        "Phishing": [
+            { texto: "Você recebe um e-mail urgente do seu 'chefe' pedindo uma transferência financeira imediata. O que você faz?", opcoes: ["Responde pedindo os dados da conta", "Confirma a solicitação por outro canal, como telefone", "Faz a transferência rapidamente"], correta: 1, dificuldade: 1 },
+            { texto: "Recebeu um SMS sobre um pacote retido nos Correios com um link para pagamento. Qual a atitude correta?", opcoes: ["Clicar e pagar a taxa", "Preencher os dados no site", "Bloquear o remetente e ignorar o link"], correta: 2, dificuldade: 1 },
+            { texto: "Um site com a logo da empresa pede a sua senha do e-mail corporativo para 'ver contracheque'. O que fazer?", opcoes: ["Digitar a senha errada de propósito", "Fechar o site e avisar a equipe de TI", "Informar a senha para ver o documento"], correta: 1, dificuldade: 2 },
+            { texto: "Surge um pop-up piscando vermelho a dizer que o seu PC está infetado com dezenas de vírus.", opcoes: ["Clicar em OK para limpar", "Baixar o antivírus oferecido na tela", "Fechar a aba pelo 'X' e rodar o antivírus corporativo"], correta: 2, dificuldade: 1 },
+            { texto: "O RH supostamente envia um e-mail sobre demissões com o anexo 'lista-oficial.pdf.exe'. O que você faz?", opcoes: ["Apagar imediatamente e reportar ao TI", "Abrir o arquivo apenas por curiosidade", "Encaminhar para os colegas"], correta: 0, dificuldade: 2 },
+            { texto: "Você recebe uma mensagem sobre um prêmio surpresa de uma viagem da empresa.", opcoes: ["Confirmar ligando para o RH", "Passar os dados bancários para o prêmio", "Clicar no link da mensagem"], correta: 0, dificuldade: 1 },
+            { texto: "Um colega de outro setor pede a sua senha pelo chat corporativo para acessar um sistema.", opcoes: ["Enviar a senha para ajudar", "Sugerir que ele faça a solicitação formal ao TI", "Enviar apenas uma dica da senha"], correta: 1, dificuldade: 2 },
+            { texto: "Alguém envia um link suspeito e sem contexto no grupo do WhatsApp da equipa.", opcoes: ["Clicar para ver do que se trata", "Alertar o grupo sobre o risco e não clicar", "Compartilhar com outros contatos"], correta: 1, dificuldade: 1 },
+            { texto: "Um e-mail do banco pede o recadastramento urgente do token de segurança.", opcoes: ["Recadastrar imediatamente", "Ignorar o e-mail e acessar a sua conta pelo aplicativo oficial", "Clicar para ver o que pedem"], correta: 1, dificuldade: 2 },
+            { texto: "Alerta: 'Sua conta Office 365 vai expirar em 1 hora. Clique aqui para renovar'.", opcoes: ["Reportar o e-mail como Phishing", "Clicar no botão Renovar rapidamente", "Trocar a senha utilizando o link enviado"], correta: 0, dificuldade: 2 }
+        ],
+        "Senhas": [
+            { texto: "Qual destas é considerada a melhor prática para criar senhas corporativas?", opcoes: ["Data de aniversário", "Frases longas contendo números e símbolos", "Nome de um animal de estimação"], correta: 1, dificuldade: 1 },
+            { texto: "Com qual frequência deves alterar a tua senha principal de acesso?", opcoes: ["Nunca", "Somente se suspeitares que ela vazou", "Regularmente, a cada 60 ou 90 dias"], correta: 2, dificuldade: 1 },
+            { texto: "A equipa de suporte técnico (TI) pede a sua senha para consertar o seu computador.", opcoes: ["Você informa, afinal eles são do TI", "Você nunca informa, senhas são intransferíveis", "Você envia apenas por e-mail para registrar"], correta: 1, dificuldade: 2 },
+            { texto: "O que é 2FA ou MFA (Autenticação Multifator)?", opcoes: ["Uma camada extra de segurança (ex: código no telemóvel)", "Um tipo avançado de antivírus", "Um tipo de firewall corporativo"], correta: 0, dificuldade: 2 },
+            { texto: "É seguro salvar a sua senha corporativa no navegador de um computador compartilhado ou de casa?", opcoes: ["Sim, desde que a tela seja bloqueada", "Nunca deve ser salva num PC não corporativo exclusivo", "Apenas as senhas de sistemas menos importantes"], correta: 1, dificuldade: 1 },
+            { texto: "O que deve fazer caso desconfie que alguém descobriu a sua senha?", opcoes: ["Esperar a confirmação", "Alterar a senha imediatamente e avisar o SOC/TI", "Desligar o computador da tomada"], correta: 1, dificuldade: 1 },
+            { texto: "Posso utilizar a mesma senha da minha rede social pessoal no e-mail corporativo?", opcoes: ["Sim, é mais fácil de lembrar", "Não, as senhas corporativas devem ser únicas", "Sim, desde que seja uma senha muito forte"], correta: 1, dificuldade: 2 },
+            { texto: "Qual é o local mais seguro para guardar senhas complexas que não consegue lembrar?", opcoes: ["Num post-it colado abaixo do teclado", "Num bloco de notas na área de trabalho", "Num gerenciador de senhas aprovado pela empresa"], correta: 2, dificuldade: 1 },
+            { texto: "Qual o padrão mínimo recomendado de comprimento para uma senha segura hoje em dia?", opcoes: ["Apenas 4 números", "Pelo menos 8 caracteres (idealmente 12 ou mais)", "Exatamente 6 letras"], correta: 1, dificuldade: 2 },
+            { texto: "Uma senha como '123456' ou 'Senha@123' é considerada:", opcoes: ["Forte", "Segura se mudada sempre", "Extremamente vulnerável a ataques de força bruta"], correta: 2, dificuldade: 1 }
+        ],
+        "LGPD": [
+            { texto: "O que significa a sigla LGPD?", opcoes: ["Lei Geral de Proteção de Dados", "Liga Global de Proteção Digital", "Lei de Garantia Pública de Dados"], correta: 0, dificuldade: 1 },
+            { texto: "Como deves descartar documentos impressos contendo dados pessoais de clientes?", opcoes: ["Jogar no lixo reciclável comum", "Triturar os documentos na fragmentadora de papel", "Apenas rasgar o documento em duas metades"], correta: 1, dificuldade: 1 },
+            { texto: "Podes enviar uma lista com informações de pacientes ou colaboradores pelo teu WhatsApp pessoal?", opcoes: ["Sim, se for para adiantar o trabalho", "Não, isso é uma grave violação da LGPD", "Apenas se for para o seu gestor direto"], correta: 1, dificuldade: 2 },
+            { texto: "Qual destes é considerado um 'Dado Pessoal Sensível' pela lei?", opcoes: ["Nome completo e endereço", "E-mail corporativo", "Dados de saúde, biometria ou religião"], correta: 2, dificuldade: 2 },
+            { texto: "O que deves fazer com a tela do teu computador ao sair da tua mesa de trabalho?", opcoes: ["Deixar aberta, se voltar rápido", "Bloquear a tela usando o atalho (Ex: Windows + L)", "Apenas desligar o monitor no botão"], correta: 1, dificuldade: 1 },
+            { texto: "Tirar foto de um documento interno ou de um sistema com dados de terceiros e postar no Instagram é:", opcoes: ["Permitido, se tapar o nome da pessoa", "Uma infração grave às normas de privacidade", "Permitido apenas nos 'Melhores Amigos'"], correta: 1, dificuldade: 1 },
+            { texto: "Podemos recolher e guardar dados extras dos clientes 'só por precaução', mesmo sem uso imediato?", opcoes: ["Sim, pode ser útil no futuro", "Não, a lei exige o Princípio da Minimização", "Apenas se o cliente concordar verbalmente"], correta: 1, dificuldade: 2 },
+            { texto: "O que fazer em caso de perda ou roubo de um telemóvel ou pendrive com dados corporativos?", opcoes: ["Ficar calado e comprar outro aparelho", "Reportar o incidente ao Encarregado de Dados (DPO) / TI imediatamente", "Tentar procurar o aparelho sozinho antes de avisar"], correta: 1, dificuldade: 2 },
+            { texto: "Um cliente entra em contato exigindo que todos os seus dados sejam apagados do sistema da empresa.", opcoes: ["Ignorar o pedido do cliente", "Acolher o pedido (Direito ao Esquecimento) e repassar ao responsável", "Cobrar uma taxa administrativa para apagar os dados"], correta: 1, dificuldade: 2 },
+            { texto: "É permitido repassar dados de contatos de pacientes para uma farmácia parceira vender produtos?", opcoes: ["Totalmente ilegal sem o consentimento explícito do paciente", "Permitido, pois ajuda o paciente a comprar remédios", "Permitido, se a empresa receber uma comissão"], correta: 0, dificuldade: 1 }
+        ],
+        "Redes": [
+            { texto: "Ao trabalhar fora da empresa, é seguro acessar sistemas corporativos utilizando o Wi-Fi público de um café?", opcoes: ["Sim, desde que a rede tenha uma senha simples", "Não, é altamente arriscado e sujeito a interceção", "Sim, os sistemas internos já possuem proteção suficiente"], correta: 1, dificuldade: 1 },
+            { texto: "O que é uma VPN e para que serve?", opcoes: ["Vírus Potencialmente Nocivo", "Rede Virtual Privada, que criptografa e protege a sua conexão", "Um tipo físico de roteador mais rápido"], correta: 1, dificuldade: 1 },
+            { texto: "Um visitante pede a senha do Wi-Fi. Qual rede deve ser fornecida?", opcoes: ["A rede administrativa interna", "Sua senha pessoal do celular", "A rede exclusiva para 'Visitantes' (Guest)"], correta: 2, dificuldade: 1 },
+            { texto: "Ao acessar um site na rede do aeroporto, aparece o aviso 'Sua conexão não é privada / Certificado Inválido'.", opcoes: ["Clicar em 'Avançar assim mesmo'", "Fechar a página imediatamente, pode ser uma interceção (Man-in-the-Middle)", "Desligar e ligar o Wi-Fi"], correta: 1, dificuldade: 2 },
+            { texto: "Manter o Bluetooth e o Wi-Fi ativados o tempo todo no seu telemóvel na rua é seguro?", opcoes: ["Sim, facilita encontrar redes", "Não, pode facilitar ataques e rastreamento", "Não faz qualquer diferença de segurança"], correta: 1, dificuldade: 1 },
+            { texto: "Você encontra um Pen Drive USB perdido no estacionamento da empresa.", opcoes: ["Guarda e conecta no seu PC corporativo para ver de quem é", "Entrega na portaria sem nunca conectá-lo a nenhum PC", "Formata o Pen Drive em casa para uso próprio"], correta: 1, dificuldade: 1 },
+            { texto: "Trabalhar com dados confidenciais no aeroporto com pessoas passando atrás de você (Shoulder Surfing).", opcoes: ["Usar uma película de privacidade na tela e ter muita atenção", "Não tem problema, ninguém lê tão rápido", "Apenas abaixar o brilho da tela é 100% suficiente"], correta: 0, dificuldade: 2 },
+            { texto: "Conectar o computador corporativo através da rede 4G roteada (hotspot) pelo seu telemóvel pessoal é seguro?", opcoes: ["É mais seguro que um Wi-Fi público, desde que o hotspot tenha uma senha forte", "É menos seguro do que usar o Wi-Fi aberto da rodoviária", "É estritamente proibido em qualquer cenário"], correta: 0, dificuldade: 2 },
+            { texto: "A senha do roteador Wi-Fi da sua casa (aquela que entra no painel de administrador) deve ser a de fábrica?", opcoes: ["Sim, é configurada com segurança pela operadora", "Não, deve ser alterada logo no primeiro dia de uso", "Tanto faz, ninguém tenta hackear redes domésticas"], correta: 1, dificuldade: 1 },
+            { texto: "Usando a rede Wi-Fi corporativa, posso instalar programas P2P (Torrent) para baixar filmes?", opcoes: ["Sim, mas apenas no seu horário de intervalo", "Proibido, expõe a rede a vulnerabilidades e viola políticas de TI", "Sim, desde que o download seja muito rápido"], correta: 1, dificuldade: 1 }
+        ]
+    };
+
+    function verificarFasesDesbloqueadas() {
+        const progresso = InfraBaseDados.colaboradorAtual.progresso;
+        document.getElementById('menu-lat-Phishing').innerHTML = `🎣 Phishing (${progresso.Phishing}/10)`;
+        if(progresso.Phishing >= 10) {
+            let menuSenhas = document.getElementById('menu-lat-Senhas');
+            menuSenhas.classList.remove('bloqueada'); menuSenhas.style.background = 'transparent'; menuSenhas.style.color = '#ffffff'; menuSenhas.style.cursor = 'pointer';
+            menuSenhas.innerHTML = `🔑 Credenciais (${progresso.Senhas}/10)`;
+        }
+        if(progresso.Senhas >= 10) {
+            let menuLGPD = document.getElementById('menu-lat-LGPD');
+            menuLGPD.classList.remove('bloqueada'); menuLGPD.style.background = 'transparent'; menuLGPD.style.color = '#ffffff'; menuLGPD.style.cursor = 'pointer';
+            menuLGPD.innerHTML = `📄 LGPD (${progresso.LGPD}/10)`;
+        }
+        if(progresso.LGPD >= 10) {
+            let menuRedes = document.getElementById('menu-lat-Redes');
+            menuRedes.classList.remove('bloqueada'); menuRedes.style.background = 'transparent'; menuRedes.style.color = '#ffffff'; menuRedes.style.cursor = 'pointer';
+            menuRedes.innerHTML = `🌐 Redes Wi-Fi (${progresso.Redes}/10)`;
+        }
+    }
+
+    function toggleSidebar() { document.getElementById('menu-lateral').classList.toggle('recolhido'); }
+    function toggleSubmenuFases() { const submenu = document.getElementById('submenu-fases'); submenu.style.display = (submenu.style.display === 'none' || submenu.style.display === '') ? 'flex' : 'none'; }
+
+    function acessarSistema() {
+        const e = document.getElementById('input-email').value.toLowerCase();
+        const msg = document.getElementById('mensagem-login');
+        if (e === "") { msg.style.color = "#ff7675"; msg.innerText = "Por favor, preencha o E-mail institucional!"; msg.style.display = "block"; return; }
+        if (!e.endsWith('@bahiana.edu.br')) { msg.style.color = "#ff7675"; msg.innerText = "Acesso restrito: Utilize um e-mail @bahiana.edu.br"; msg.style.display = "block"; return; }
+
+        const n = e.split('@')[0]; 
+        
+        document.getElementById('nome-plataforma-superior').innerText = n;
+        document.getElementById('nome-usuario-logado').innerText = n;
+        document.getElementById('nome-usuario-lateral').innerText = n;
+
+        document.getElementById('tela-login').style.display = "none"; document.getElementById('tela-plataforma').style.display = "flex";
+        
+        if (e.includes('soc')) { 
+            document.getElementById('painel-soc').classList.add('ativo'); document.getElementById('painel-colaborador').classList.remove('ativo'); document.getElementById('menu-lateral').style.display = 'none'; document.getElementById('logo-header-soc').style.display = 'flex'; document.getElementById('btn-toggle-sidebar').style.display = 'none'; atualizarPainelSOC(); 
+        } else { 
+            InfraBaseDados.colaboradorAtual.nome = n; document.getElementById('painel-colaborador').classList.add('ativo'); document.getElementById('painel-soc').classList.remove('ativo'); document.getElementById('menu-lateral').style.display = 'flex'; document.getElementById('logo-header-soc').style.display = 'none'; document.getElementById('btn-toggle-sidebar').style.display = 'block'; ModuloGamificacao.atualizarSequenciaDiaria(); InfraBaseDados.salvarProgresso(); atualizarInterfaceColaborador(); verificarFasesDesbloqueadas();
+            atualizarAvatar();
+        }
+    }
+
+    let avatarUrlAtual = "";
+    
+    function atualizarAvatar() {
+        const skin = document.getElementById('av-skin').value;
+        const hair = document.getElementById('av-hair').value;
+        const hairColor = document.getElementById('av-hairColor').value;
+        const clothes = document.getElementById('av-clothes').value;
+        const accessories = document.getElementById('av-accessories').value;
+        const eyes = document.getElementById('av-eyes').value;
+        const mouth = document.getElementById('av-mouth').value;
+        const facialHair = document.getElementById('av-facialHair').value;
+        
+        const shieldShape = document.getElementById('av-shieldShape').value;
+        const shieldColor = document.getElementById('av-shieldColor').value;
+
+        let url = `https://api.dicebear.com/9.x/avataaars/svg?backgroundColor=transparent&skinColor=${skin}&top=${hair}&hairColor=${hairColor}&clothing=${clothes}&eyes=${eyes}&mouth=${mouth}`;
+        
+        if (accessories !== "none") { url += `&accessories=${accessories}`; }
+        if (facialHair !== "none") { url += `&facialHair=${facialHair}`; }
+
+        avatarUrlAtual = url;
+        
+        const imgElement = document.getElementById('preview-avatar-api');
+        imgElement.classList.remove('animar-avatar');
+        void imgElement.offsetWidth; 
+        imgElement.classList.add('animar-avatar');
+        
+        imgElement.src = avatarUrlAtual;
+
+        document.getElementById('preview-escudo-path').setAttribute('d', shieldShape);
+        document.getElementById('preview-escudo-path').setAttribute('fill', shieldColor);
+    }
+
+    function gerarAvatarAleatorio() {
+        const selects = document.querySelectorAll('.select-avatar');
+        selects.forEach(select => {
+            const options = select.options;
+            const randomIndex = Math.floor(Math.random() * options.length);
+            select.selectedIndex = randomIndex;
+        });
+
+        const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+        document.getElementById('av-shieldColor').value = randomColor;
+
+        atualizarAvatar();
+    }
+
+    function salvarAvatarNoMenu() {
+        if(avatarUrlAtual !== "") {
+            document.getElementById('avatar-img').src = avatarUrlAtual;
+        }
+        
+        const shieldShape = document.getElementById('av-shieldShape').value;
+        const shieldColor = document.getElementById('av-shieldColor').value;
+        document.getElementById('escudo-menu-lateral').innerHTML = `<svg viewBox="0 0 24 24" width="30" height="30" style="filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.6)); margin-top: 5px;"><path d="${shieldShape}" fill="${shieldColor}"/></svg>`;
+        
+        lancarConfetes();
+        alert("Identidade de Agente SOC atualizada com sucesso!");
+        alternarAbaColaborador('missoes');
+    }
+
+    function alterarAvatar(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) { document.getElementById('avatar-img').src = e.target.result; }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function sairDoSistema() { 
+        document.getElementById('nome-plataforma-superior').innerText = "SOC Education";
+        document.getElementById('tela-plataforma').style.display = "none"; document.getElementById('tela-cadeado').style.display = "block"; document.getElementById('input-email').value = ""; document.getElementById('input-senha').value = ""; 
+        document.getElementById('btn-toggle-sidebar').style.display = 'none'; document.getElementById('submenu-fases').style.display = 'none'; document.getElementById('escudo-menu-lateral').innerHTML = ''; 
+        alternarAbaColaborador('missoes'); voltarParaMenu();
+    }
+    
+    function alternarAbaColaborador(a) { 
+        const abas = ['missoes', 'progresso', 'dicas', 'noticias', 'avatar']; 
+        abas.forEach(aba => { let elemento = document.getElementById('aba-' + aba); if(elemento) elemento.style.display = 'none'; let btn = document.getElementById('btn-aba-' + aba); if(btn) btn.classList.remove('ativa'); }); 
+        document.getElementById('aba-' + a).style.display = 'block'; 
+        let btnAtivo = document.getElementById('btn-aba-' + a); if(btnAtivo) btnAtivo.classList.add('ativa'); 
+        if(a === 'progresso') atualizarPainelProgresso(); if(a === 'noticias') carregarNoticiasReais(); 
+    }
+
+    function atualizarInterfaceColaborador() { document.getElementById('exibir-xp').innerText = "🏆 " + InfraBaseDados.colaboradorAtual.xp + " XP"; document.getElementById('exibir-vidas').innerText = "❤️ " + InfraBaseDados.colaboradorAtual.vidas + " Escudos"; document.getElementById('exibir-ofensiva').innerText = "🔥 " + InfraBaseDados.colaboradorAtual.sequenciaDias + " Dia(s)"; atualizarPainelProgresso(); }
+    
+    function atualizarPainelProgresso() { 
+        const xp = InfraBaseDados.colaboradorAtual.xp; 
+        const sN = ModuloGamificacao.calcularNivelAtual(xp); 
+        document.getElementById('titulo-nivel').innerText = sN.titulo; 
+        document.getElementById('barra-progresso-xp').style.width = sN.porcentagem + "%"; 
+        document.getElementById('barra-progresso-xp').innerText = sN.porcentagem + "%"; 
+        const area = document.getElementById('area-conquistas'); 
+        area.innerHTML = ""; 
+        InfraBaseDados.conquistas.forEach(c => { 
+            const d = xp >= c.xpNecessario; 
+            area.innerHTML += `<div class="cartao-conquista ${d ? 'desbloqueada' : ''}"><span class="icone-conquista">${c.icone}</span><strong>${c.nome}</strong><small>${d ? 'Liberado' : c.xpNecessario+'XP'}</small></div>`; 
+        }); 
+
+        // NOVO: Verifica progresso para o certificado
+        const p = InfraBaseDados.colaboradorAtual.progresso;
+        const acertosTotais = p.Phishing + p.Senhas + p.LGPD + p.Redes;
+        const resp = InfraBaseDados.colaboradorAtual.questoesRespondidas || acertosTotais;
+        const taxa = resp > 0 ? (acertosTotais / resp) : 0;
+        
+        let btnExistente = document.getElementById('area-btn-certificado');
+        if(acertosTotais >= 40) {
+            if(!btnExistente) {
+                if(taxa >= 0.8) {
+                    document.getElementById('aba-progresso').innerHTML += `<div id="area-btn-certificado" style="text-align:center; margin-top:40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><button class="btn-entrar" style="width: auto; padding: 15px 40px; font-size: 1.2em; background: linear-gradient(to right, #f1c40f, #f39c12); box-shadow: 0 10px 20px rgba(243, 156, 18, 0.4);" onclick="gerarCertificado()">🎓 Emitir Certificado de Conclusão</button></div>`;
+                } else {
+                    document.getElementById('aba-progresso').innerHTML += `<div id="area-btn-certificado" style="text-align:center; margin-top:40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><p style="color:#ff7675; font-weight:bold;">Treinamento concluído! Seu aproveitamento foi de ${(taxa*100).toFixed(1)}%. São necessários 80% para o certificado.</p></div>`;
+                }
+            }
+        }
+    }
+
+    function iniciarMissaoMenu(tema) { if(document.getElementById('menu-lat-' + tema).classList.contains('bloqueada')) { alert("Fase bloqueada!"); return; } alternarAbaColaborador('missoes'); document.getElementById('texto-intro-missao').style.display = 'none'; iniciarMissao(tema); }
+    function voltarParaMenu() { document.getElementById('texto-intro-missao').style.display = 'block'; document.getElementById('area-missao').style.textAlign = 'center'; document.getElementById('area-missao').innerHTML = '<p style="color: #dcdde1; font-size: 1.2em; margin-top: 40px;">👈 Selecione uma fase no menu lateral para iniciar sua missão.</p>'; }
+
+    function iniciarMissao(t) { 
+        if(InfraBaseDados.colaboradorAtual.vidas <= 0) { alert("Sistemas bloqueados!"); return; } 
+        if(InfraBaseDados.colaboradorAtual.progresso[t] >= 10) { alert("Trilha concluída!"); return; }
+        
+        const area = document.getElementById('area-missao'); area.style.textAlign = 'left';
+        
+        area.innerHTML = `<h3 style="color:#f1c40f; display:flex; align-items:center; gap:10px;"><span style="animation: pulsarCadeado 1s infinite alternate;">🤖</span> Carregando cenário de ${t}...</h3>`; 
+        
+        setTimeout(() => {
+            const progressoAtual = InfraBaseDados.colaboradorAtual.progresso[t];
+            window.perguntaAtiva = BancoDePerguntas[t][progressoAtual];
+            window.temaAtual = t; 
+            
+            let h = `<p style="font-size: 1.1em; color: #ffffff;"><strong>${window.perguntaAtiva.texto}</strong></p><div style="display:flex; flex-direction:column; gap:12px; margin-top: 20px;">`;
+            window.perguntaAtiva.opcoes.forEach((op, i) => {
+                h += `<button class="botao" style="background:rgba(0,0,0,0.4); color:#ffffff; border: 1px solid rgba(255,255,255,0.3); padding: 15px; text-align: left;" onmouseover="this.style.background='rgba(255,255,255,0.2)';" onmouseout="this.style.background='rgba(0,0,0,0.4)';" onclick="validarResposta(${i})">${op}</button>`;
+            });
+            h += `</div><div style="display:flex; justify-content:space-between; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><button class="btn-aba" style="background: rgba(255,255,255,0.1); color: white;" onclick="voltarParaMenu()">⬅ Anterior (Voltar)</button><button class="btn-aba" style="background: rgba(255,255,255,0.1); color: white;" onclick="iniciarMissao('${t}')">Recarregar Pergunta ➡</button></div>`;
+            area.innerHTML = h;
+        }, 400); 
+    }
+
+    function validarResposta(i) {
+        // REGISTRA A RESPOSTA (Acerto ou Erro)
+        InfraBaseDados.colaboradorAtual.questoesRespondidas = (InfraBaseDados.colaboradorAtual.questoesRespondidas || 0) + 1;
+
+        if(i === window.perguntaAtiva.correta) { 
+            InfraBaseDados.colaboradorAtual.xp += ModuloGamificacao.calcularXPExponencial(window.perguntaAtiva.dificuldade || 1); 
+            InfraBaseDados.colaboradorAtual.progresso[window.temaAtual]++; 
+            lancarConfetes(); 
+            document.getElementById('area-missao').innerHTML = `<h3 style="color:#2ecc71;">✅ Correto! Você tem ${InfraBaseDados.colaboradorAtual.progresso[window.temaAtual]}/10 completas.</h3>`; 
+        } else { 
+            InfraBaseDados.colaboradorAtual.vidas -= 1; 
+            document.getElementById('area-missao').innerHTML = `<h3 style='color:#ff7675;'>❌ Errado! Você perdeu 1 Escudo.</h3>`; 
+        }
+        
+        InfraBaseDados.salvarProgresso(); 
+        atualizarInterfaceColaborador(); 
+        verificarFasesDesbloqueadas(); 
+
+        const p = InfraBaseDados.colaboradorAtual.progresso;
+        const acertosTotais = p.Phishing + p.Senhas + p.LGPD + p.Redes;
+        const resp = InfraBaseDados.colaboradorAtual.questoesRespondidas || acertosTotais;
+        const taxa = resp > 0 ? (acertosTotais / resp) : 0;
+        
+        if (InfraBaseDados.colaboradorAtual.progresso[window.temaAtual] < 10) {
+            document.getElementById('area-missao').innerHTML += `<div style="display:flex; justify-content:space-between; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><button class="btn-aba" style="background: rgba(255,255,255,0.1); color: white;" onclick="voltarParaMenu()">⬅ Menu</button><button class="btn-entrar" style="width: auto; margin-top: 0; padding: 10px 30px;" onclick="iniciarMissao('${window.temaAtual}')">Próxima ➡</button></div>`;
+        } else if (acertosTotais >= 40 && taxa >= 0.8) {
+            document.getElementById('area-missao').innerHTML += `<div style="display:flex; justify-content:center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><button class="btn-entrar" style="width: auto; margin-top: 0; padding: 15px 40px; background: linear-gradient(to right, #f1c40f, #f39c12); font-size: 1.1em;" onclick="gerarCertificado()">🎓 Gerar Certificado Oficial</button></div>`;
+        } else if (acertosTotais >= 40 && taxa < 0.8) {
+            document.getElementById('area-missao').innerHTML += `<div style="display:flex; justify-content:center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><p style="color:#ff7675;">Treinamento concluído (Aproveitamento: ${(taxa*100).toFixed(1)}% - Mínimo 80%)</p><br><button class="btn-aba" style="background: rgba(255,255,255,0.1); color: white;" onclick="voltarParaMenu()">Voltar ao Menu</button></div>`;
+        } else {
+            document.getElementById('area-missao').innerHTML += `<div style="display:flex; justify-content:center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><button class="btn-aba" style="background: rgba(255,255,255,0.1); color: white;" onclick="voltarParaMenu()">🏆 Fase Concluída! Voltar ao Menu</button></div>`;
+        }
+    }
+    
+    // =======================================================
+    // FUNÇÕES DE CERTIFICADO (NOVO)
+    // =======================================================
+    function gerarCertificado() {
+        const p = InfraBaseDados.colaboradorAtual.progresso;
+        const acertosTotais = p.Phishing + p.Senhas + p.LGPD + p.Redes;
+        const resp = InfraBaseDados.colaboradorAtual.questoesRespondidas || acertosTotais;
+        const taxa = resp > 0 ? (acertosTotais / resp) * 100 : 0;
+
+        document.getElementById('cert-nome').innerText = InfraBaseDados.colaboradorAtual.nome;
+        document.getElementById('cert-taxa').innerText = taxa.toFixed(1) + "%";
+        document.getElementById('cert-data').innerText = new Date().toLocaleDateString('pt-BR');
+        
+        document.getElementById('modal-certificado').classList.add('ativo');
+        lancarConfetes();
+    }
+
+    function fecharCertificado() {
+        document.getElementById('modal-certificado').classList.remove('ativo');
+    }
+
+    function atualizarPainelSOC() { const r = InfraBaseDados.obterRanking().sort((a,b) => b.xp - a.xp); document.getElementById('corpo-ranking').innerHTML = r.map((c, i) => `<tr><td>${i + 1}º</td><td>${c.nome}</td><td><strong style="color:#2ecc71;">${c.xp} XP</strong></td></tr>`).join(''); }
+    async function carregarNoticiasReais() { let conteiner = document.querySelector('.lista-noticias'); try { const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent('https://www.microsoft.com/en-us/security/blog/feed/')}`); const data = await res.json(); if (data.status === 'ok') { conteiner.innerHTML = ''; data.items.slice(0, 5).forEach(n => { let res = n.description.replace(/<[^>]*>?/gm, '').substring(0, 130) + '...'; conteiner.innerHTML += `<a href="${n.link}" target="_blank" class="link-noticia"><div class="item-noticia" style="border-left-color: #3498db;"><span class="data-noticia" style="color:#3498db;">Microsoft Security</span><h4 class="titulo-noticia">${n.title}</h4><p class="resumo-noticia">${res}</p></div></a>`; }); } } catch (e) { conteiner.innerHTML = 'Erro ao carregar notícias.'; } }
+
+    function abrirModalDica(titulo, texto, imgUrl) { document.getElementById('modal-titulo').innerHTML = titulo; document.getElementById('modal-texto').innerHTML = texto; document.getElementById('modal-imagem').src = imgUrl; let m = document.getElementById('modal-dica'); m.style.display = 'flex'; setTimeout(() => { m.classList.add('ativo'); }, 10); }
+    function fecharModalDica(event) { if (!event || event.target.id === 'modal-dica' || event.target.classList.contains('modal-fechar')) { let m = document.getElementById('modal-dica'); m.classList.remove('ativo'); setTimeout(() => { m.style.display = 'none'; }, 300); } }
+</script>
+</body>
+</html>
