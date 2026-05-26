@@ -438,7 +438,7 @@
 
     <div id="modal-certificado" class="modal-certificado">
         <div class="certificado-box" id="area-impressao-certificado">
-            <img src="ebmsp-escola-bahiana-de-medicina-e-saude-publica.webp" alt="Logo Bahiana" class="cert-logo">
+            <img src="ebmsp-escola-bahiana-de-medicina-e-saude-publica.png" alt="Logo Bahiana" class="cert-logo">
             <h1 class="cert-titulo">Certificado</h1>
             <p class="cert-texto">Certificamos que</p>
             <h2 class="cert-nome" id="cert-nome">NOME DO USUÁRIO</h2>
@@ -520,9 +520,6 @@
         }
     };
 
-    // =======================================================
-    // BANCO DE DADOS ESTÁTICO DE PERGUNTAS (Substitui IA)
-    // =======================================================
     const BancoDePerguntas = {
         "Phishing": [
             { texto: "Você recebe um e-mail urgente do seu 'chefe' pedindo uma transferência financeira imediata. O que você faz?", opcoes: ["Responde pedindo os dados da conta", "Confirma a solicitação por outro canal, como telefone", "Faz a transferência rapidamente"], correta: 1, dificuldade: 1 },
@@ -614,8 +611,21 @@
         if (e.includes('soc')) { 
             document.getElementById('painel-soc').classList.add('ativo'); document.getElementById('painel-colaborador').classList.remove('ativo'); document.getElementById('menu-lateral').style.display = 'none'; document.getElementById('logo-header-soc').style.display = 'flex'; document.getElementById('btn-toggle-sidebar').style.display = 'none'; atualizarPainelSOC(); 
         } else { 
-            InfraBaseDados.colaboradorAtual.nome = n; document.getElementById('painel-colaborador').classList.add('ativo'); document.getElementById('painel-soc').classList.remove('ativo'); document.getElementById('menu-lateral').style.display = 'flex'; document.getElementById('logo-header-soc').style.display = 'none'; document.getElementById('btn-toggle-sidebar').style.display = 'block'; ModuloGamificacao.atualizarSequenciaDiaria(); InfraBaseDados.salvarProgresso(); atualizarInterfaceColaborador(); verificarFasesDesbloqueadas();
-            atualizarAvatar();
+            let r = JSON.parse(localStorage.getItem('rankingEmpresa')) || [];
+            let userSalvo = r.find(c => c.nome === n);
+
+            if (userSalvo) {
+                InfraBaseDados.colaboradorAtual = userSalvo;
+                if(userSalvo.avatarPersonalizado) { document.getElementById('avatar-img').src = userSalvo.avatarPersonalizado; } else { document.getElementById('avatar-img').src = `https://api.dicebear.com/9.x/avataaars/svg?seed=${n}&backgroundColor=transparent`; }
+                if(userSalvo.escudoPersonalizado) { document.getElementById('escudo-menu-lateral').innerHTML = userSalvo.escudoPersonalizado; } else { document.getElementById('escudo-menu-lateral').innerHTML = ''; }
+            } else {
+                InfraBaseDados.colaboradorAtual = { nome: n, xp: 0, vidas: 3, sequenciaDias: 0, ultimoAcesso: null, progresso: { Phishing: 0, Senhas: 0, LGPD: 0, Redes: 0 }, avatarPersonalizado: null, escudoPersonalizado: null, questoesRespondidas: 0 };
+                document.getElementById('avatar-img').src = `https://api.dicebear.com/9.x/avataaars/svg?seed=${n}&backgroundColor=transparent`;
+                document.getElementById('escudo-menu-lateral').innerHTML = '';
+            }
+
+            document.getElementById('painel-colaborador').classList.add('ativo'); document.getElementById('painel-soc').classList.remove('ativo'); document.getElementById('menu-lateral').style.display = 'flex'; document.getElementById('logo-header-soc').style.display = 'none'; document.getElementById('btn-toggle-sidebar').style.display = 'block'; 
+            ModuloGamificacao.atualizarSequenciaDiaria(); InfraBaseDados.salvarProgresso(); atualizarInterfaceColaborador(); verificarFasesDesbloqueadas();
         }
     }
 
@@ -635,17 +645,14 @@
         const shieldColor = document.getElementById('av-shieldColor').value;
 
         let url = `https://api.dicebear.com/9.x/avataaars/svg?backgroundColor=transparent&skinColor=${skin}&top=${hair}&hairColor=${hairColor}&clothing=${clothes}&eyes=${eyes}&mouth=${mouth}`;
-        
         if (accessories !== "none") { url += `&accessories=${accessories}`; }
         if (facialHair !== "none") { url += `&facialHair=${facialHair}`; }
 
         avatarUrlAtual = url;
-        
         const imgElement = document.getElementById('preview-avatar-api');
         imgElement.classList.remove('animar-avatar');
         void imgElement.offsetWidth; 
         imgElement.classList.add('animar-avatar');
-        
         imgElement.src = avatarUrlAtual;
 
         document.getElementById('preview-escudo-path').setAttribute('d', shieldShape);
@@ -654,39 +661,25 @@
 
     function gerarAvatarAleatorio() {
         const selects = document.querySelectorAll('.select-avatar');
-        selects.forEach(select => {
-            const options = select.options;
-            const randomIndex = Math.floor(Math.random() * options.length);
-            select.selectedIndex = randomIndex;
-        });
-
-        const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
-        document.getElementById('av-shieldColor').value = randomColor;
-
+        selects.forEach(select => { const options = select.options; select.selectedIndex = Math.floor(Math.random() * options.length); });
+        document.getElementById('av-shieldColor').value = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
         atualizarAvatar();
     }
 
     function salvarAvatarNoMenu() {
-        if(avatarUrlAtual !== "") {
-            document.getElementById('avatar-img').src = avatarUrlAtual;
-        }
-        
+        if(avatarUrlAtual !== "") { document.getElementById('avatar-img').src = avatarUrlAtual; InfraBaseDados.colaboradorAtual.avatarPersonalizado = avatarUrlAtual; }
         const shieldShape = document.getElementById('av-shieldShape').value;
         const shieldColor = document.getElementById('av-shieldColor').value;
-        document.getElementById('escudo-menu-lateral').innerHTML = `<svg viewBox="0 0 24 24" width="30" height="30" style="filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.6)); margin-top: 5px;"><path d="${shieldShape}" fill="${shieldColor}"/></svg>`;
-        
-        lancarConfetes();
-        alert("Identidade de Agente SOC atualizada com sucesso!");
-        alternarAbaColaborador('missoes');
+        const escudoHTML = `<svg viewBox="0 0 24 24" width="30" height="30" style="filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.6)); margin-top: 5px;"><path d="${shieldShape}" fill="${shieldColor}"/></svg>`;
+        document.getElementById('escudo-menu-lateral').innerHTML = escudoHTML;
+        InfraBaseDados.colaboradorAtual.escudoPersonalizado = escudoHTML; 
+        InfraBaseDados.salvarProgresso();
+        lancarConfetes(); alert("Identidade de Agente SOC atualizada com sucesso!"); alternarAbaColaborador('missoes');
     }
 
     function alterarAvatar(event) {
         const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) { document.getElementById('avatar-img').src = e.target.result; }
-            reader.readAsDataURL(file);
-        }
+        if (file) { const reader = new FileReader(); reader.onload = function(e) { document.getElementById('avatar-img').src = e.target.result; InfraBaseDados.colaboradorAtual.avatarPersonalizado = e.target.result; InfraBaseDados.salvarProgresso(); }; reader.readAsDataURL(file); }
     }
 
     function sairDoSistema() { 
@@ -701,6 +694,7 @@
         abas.forEach(aba => { let elemento = document.getElementById('aba-' + aba); if(elemento) elemento.style.display = 'none'; let btn = document.getElementById('btn-aba-' + aba); if(btn) btn.classList.remove('ativa'); }); 
         document.getElementById('aba-' + a).style.display = 'block'; 
         let btnAtivo = document.getElementById('btn-aba-' + a); if(btnAtivo) btnAtivo.classList.add('ativa'); 
+        
         if(a === 'progresso') atualizarPainelProgresso(); if(a === 'noticias') carregarNoticiasReais(); 
     }
 
@@ -719,7 +713,6 @@
             area.innerHTML += `<div class="cartao-conquista ${d ? 'desbloqueada' : ''}"><span class="icone-conquista">${c.icone}</span><strong>${c.nome}</strong><small>${d ? 'Liberado' : c.xpNecessario+'XP'}</small></div>`; 
         }); 
 
-        // NOVO: Verifica progresso para o certificado
         const p = InfraBaseDados.colaboradorAtual.progresso;
         const acertosTotais = p.Phishing + p.Senhas + p.LGPD + p.Redes;
         const resp = InfraBaseDados.colaboradorAtual.questoesRespondidas || acertosTotais;
@@ -731,7 +724,7 @@
                 if(taxa >= 0.8) {
                     document.getElementById('aba-progresso').innerHTML += `<div id="area-btn-certificado" style="text-align:center; margin-top:40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><button class="btn-entrar" style="width: auto; padding: 15px 40px; font-size: 1.2em; background: linear-gradient(to right, #f1c40f, #f39c12); box-shadow: 0 10px 20px rgba(243, 156, 18, 0.4);" onclick="gerarCertificado()">🎓 Emitir Certificado de Conclusão</button></div>`;
                 } else {
-                    document.getElementById('aba-progresso').innerHTML += `<div id="area-btn-certificado" style="text-align:center; margin-top:40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><p style="color:#ff7675; font-weight:bold;">Treinamento concluído! Seu aproveitamento foi de ${(taxa*100).toFixed(1)}%. São necessários 80% para o certificado.</p></div>`;
+                    document.getElementById('aba-progresso').innerHTML += `<div id="area-btn-certificado" style="text-align:center; margin-top:40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><p style="color:#ff7675; font-weight:bold;">Treinamento concluído! Seu aproveitamento foi de ${(taxa*100).toFixed(1)}%. São necessários 80% para o certificado.</p><button class="btn-entrar" style="width: auto; margin-top: 15px; padding: 10px 20px;" onclick="reiniciarTreinamento()">🔄 Reiniciar Treinamento</button></div>`;
                 }
             }
         }
@@ -740,8 +733,30 @@
     function iniciarMissaoMenu(tema) { if(document.getElementById('menu-lat-' + tema).classList.contains('bloqueada')) { alert("Fase bloqueada!"); return; } alternarAbaColaborador('missoes'); document.getElementById('texto-intro-missao').style.display = 'none'; iniciarMissao(tema); }
     function voltarParaMenu() { document.getElementById('texto-intro-missao').style.display = 'block'; document.getElementById('area-missao').style.textAlign = 'center'; document.getElementById('area-missao').innerHTML = '<p style="color: #dcdde1; font-size: 1.2em; margin-top: 40px;">👈 Selecione uma fase no menu lateral para iniciar sua missão.</p>'; }
 
+    // FUNÇÃO INJETADA PARA REINICIAR SE A NOTA FOR BAIXA OU AS VIDAS ACABAREM
+    function reiniciarTreinamento() {
+        InfraBaseDados.colaboradorAtual.xp = 0;
+        InfraBaseDados.colaboradorAtual.vidas = 3;
+        InfraBaseDados.colaboradorAtual.progresso = { Phishing: 0, Senhas: 0, LGPD: 0, Redes: 0 };
+        InfraBaseDados.colaboradorAtual.questoesRespondidas = 0;
+        InfraBaseDados.salvarProgresso();
+        atualizarInterfaceColaborador();
+        verificarFasesDesbloqueadas();
+        voltarParaMenu();
+        alert("Treinamento reiniciado! Boa sorte!");
+    }
+
     function iniciarMissao(t) { 
-        if(InfraBaseDados.colaboradorAtual.vidas <= 0) { alert("Sistemas bloqueados!"); return; } 
+        if(InfraBaseDados.colaboradorAtual.vidas <= 0) { 
+            document.getElementById('area-missao').innerHTML = `
+                <div style="text-align: center;">
+                    <h3 style='color:#ff7675;'>🔒 Sistemas Bloqueados!</h3>
+                    <p>Você perdeu todos os seus escudos de defesa.</p>
+                    <button class="btn-entrar" style="width: auto; padding: 10px 30px;" onclick="reiniciarTreinamento()">🔄 Reiniciar Treinamento</button>
+                </div>`;
+            return; 
+        } 
+        
         if(InfraBaseDados.colaboradorAtual.progresso[t] >= 10) { alert("Trilha concluída!"); return; }
         
         const area = document.getElementById('area-missao'); area.style.textAlign = 'left';
@@ -763,7 +778,6 @@
     }
 
     function validarResposta(i) {
-        // REGISTRA A RESPOSTA (Acerto ou Erro)
         InfraBaseDados.colaboradorAtual.questoesRespondidas = (InfraBaseDados.colaboradorAtual.questoesRespondidas || 0) + 1;
 
         if(i === window.perguntaAtiva.correta) { 
@@ -790,15 +804,12 @@
         } else if (acertosTotais >= 40 && taxa >= 0.8) {
             document.getElementById('area-missao').innerHTML += `<div style="display:flex; justify-content:center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><button class="btn-entrar" style="width: auto; margin-top: 0; padding: 15px 40px; background: linear-gradient(to right, #f1c40f, #f39c12); font-size: 1.1em;" onclick="gerarCertificado()">🎓 Gerar Certificado Oficial</button></div>`;
         } else if (acertosTotais >= 40 && taxa < 0.8) {
-            document.getElementById('area-missao').innerHTML += `<div style="display:flex; justify-content:center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><p style="color:#ff7675;">Treinamento concluído (Aproveitamento: ${(taxa*100).toFixed(1)}% - Mínimo 80%)</p><br><button class="btn-aba" style="background: rgba(255,255,255,0.1); color: white;" onclick="voltarParaMenu()">Voltar ao Menu</button></div>`;
+            document.getElementById('area-missao').innerHTML += `<div style="display:flex; flex-direction: column; align-items: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><p style="color:#ff7675; font-weight:bold;">Treinamento concluído (Aproveitamento: ${(taxa*100).toFixed(1)}% - Mínimo 80%).</p><button class="btn-entrar" style="width: auto; margin-top: 15px; padding: 10px 20px;" onclick="reiniciarTreinamento()">🔄 Reiniciar Treinamento</button></div>`;
         } else {
             document.getElementById('area-missao').innerHTML += `<div style="display:flex; justify-content:center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><button class="btn-aba" style="background: rgba(255,255,255,0.1); color: white;" onclick="voltarParaMenu()">🏆 Fase Concluída! Voltar ao Menu</button></div>`;
         }
     }
     
-    // =======================================================
-    // FUNÇÕES DE CERTIFICADO (NOVO)
-    // =======================================================
     function gerarCertificado() {
         const p = InfraBaseDados.colaboradorAtual.progresso;
         const acertosTotais = p.Phishing + p.Senhas + p.LGPD + p.Redes;
