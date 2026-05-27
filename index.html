@@ -149,26 +149,31 @@
         .modal-fechar:hover { background: #ff7675; }
 
         /* =======================================================
-           ESTILOS DO CERTIFICADO E IMPRESSÃO (INJETADO)
+           MASCOTE BAHIANAINHO
            ======================================================= */
-        .modal-certificado { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 10000; flex-direction: column; overflow-y: auto; padding: 20px; opacity: 0; transition: opacity 0.4s;}
-        .modal-certificado.ativo { display: flex; opacity: 1; }
-        .certificado-box { background: white; color: #2c3e50; padding: 60px; border: 15px solid #115927; border-radius: 10px; text-align: center; max-width: 800px; width: 100%; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5); transform: scale(0.8); transition: transform 0.4s ease; }
-        .modal-certificado.ativo .certificado-box { transform: scale(1); }
-        .cert-logo { height: 100px; margin-bottom: 20px; }
-        .cert-titulo { font-size: 3em; margin: 0; color: #115927; font-family: serif; text-transform: uppercase; letter-spacing: 2px;}
-        .cert-texto { font-size: 1.4em; margin: 25px 0; color: #34495e; }
-        .cert-nome { font-size: 2.8em; color: #27ae60; border-bottom: 2px solid #bdc3c7; padding-bottom: 10px; margin: 10px 0; display: inline-block; min-width: 60%; font-weight: 900;}
-        .cert-footer { display: flex; justify-content: space-around; margin-top: 40px; border-top: 2px solid #ecf0f1; padding-top: 20px; }
-        .cert-info p { margin: 5px 0; font-size: 1.2em; color: #7f8c8d; }
-        .cert-info strong { font-size: 1.8em; color: #f39c12; }
-        
-        @media print {
-            body * { visibility: hidden; }
-            .modal-certificado { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: white; padding: 0; display: block !important; }
-            .certificado-box { box-shadow: none; border: 15px solid #115927; width: 100%; max-width: 100%; margin: 0; padding: 40px; visibility: visible; transform: scale(1); }
-            .certificado-box * { visibility: visible; }
-            .botoes-print { display: none !important; }
+        .mascote-bahianainho {
+            position: fixed;
+            bottom: 50px; 
+            right: 40px; /* Alterado de left para right */
+            width: 160px; 
+            z-index: 150;
+            pointer-events: none; 
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.4));
+            display: none; 
+            transition: opacity 0.3s ease;
+        }
+
+        /* Animação de Pulo */
+        @keyframes puloComemoracao {
+            0% { transform: translateY(0) scale(1); }
+            30% { transform: translateY(-50px) scale(1.05); }
+            50% { transform: translateY(0) scale(1); }
+            70% { transform: translateY(-20px) scale(1.02); }
+            100% { transform: translateY(0) scale(1); }
+        }
+
+        .mascote-pulando {
+            animation: puloComemoracao 0.8s ease-in-out;
         }
     </style>
 </head>
@@ -177,7 +182,7 @@
     <div id="tela-cadeado" onclick="destrancarPlataforma()"><div class="icone-cadeado">🔒</div><div class="texto-cadeado">Clique para Acessar</div></div>
 
     <div id="tela-login">
-        <img src="ebmsp-escola-bahiana-de-medicina-e-saude-publica.png" alt="Logo Bahiana" class="logo-login">
+        <img src="ebmsp-escola-bahiana-de-medicina-e-saude-publica.webp" alt="Logo Bahiana" class="logo-login">
         <h2 class="titulo-login">Acesso Seguro</h2>
         <p class="texto-dica">Utilize <strong>soc@</strong> no e-mail para acesso Gestor.</p>
         <input type="email" id="input-email" class="campo-texto" placeholder="E-mail institucional" onkeypress="if(event.key === 'Enter') acessarSistema()">
@@ -188,7 +193,7 @@
     </div>
 
     <div id="tela-cadastro">
-        <img src="ebmsp-escola-bahiana-de-medicina-e-saude-publica.png" alt="Logo Bahiana" class="logo-login">
+        <img src="ebmsp-escola-bahiana-de-medicina-e-saude-publica.webp" alt="Logo Bahiana" class="logo-login">
         <h2 class="titulo-login">Novo Cadastro</h2>
         <p class="texto-dica">Insira seus dados institucionais.</p>
         <input type="email" id="input-email-cad" class="campo-texto" placeholder="E-mail institucional">
@@ -203,7 +208,7 @@
         
         <aside id="menu-lateral" class="menu-lateral" style="display: none;">
             <div class="logo-menu">
-                <img src="ebmsp-escola-bahiana-de-medicina-e-saude-publica.png" alt="Logo">
+                <img src="ebmsp-escola-bahiana-de-medicina-e-saude-publica.webp" alt="Logo">
                 <span id="nome-plataforma-lateral">SOC Education</span>
             </div>
 
@@ -234,11 +239,13 @@
             </nav>
         </aside>
 
+        <img id="mascote-bahianainho" src="Bahianainho-removebg-preview.png" alt="Bahianainho Mascote" class="mascote-bahianainho">
+
         <div class="lado-direito">
             <header class="menu-superior">
                 <div style="display: flex; align-items: center;">
                     <button id="btn-toggle-sidebar" class="btn-toggle-menu" style="display: none;" onclick="toggleSidebar()">☰</button>
-                    <div class="logo-menu" id="logo-header-soc"><img src="ebmsp-escola-bahiana-de-medicina-e-saude-publica.png" alt="Logo"><span id="nome-plataforma-superior">SOC Education</span></div>
+                    <div class="logo-menu" id="logo-header-soc"><img src="ebmsp-escola-bahiana-de-medicina-e-saude-publica.webp" alt="Logo"><span id="nome-plataforma-superior">SOC Education</span></div>
                 </div>
                 
                 <div class="usuario-info">
@@ -436,30 +443,6 @@
         </div>
     </div>
 
-    <div id="modal-certificado" class="modal-certificado">
-        <div class="certificado-box" id="area-impressao-certificado">
-            <img src="ebmsp-escola-bahiana-de-medicina-e-saude-publica.webp" alt="Logo Bahiana" class="cert-logo">
-            <h1 class="cert-titulo">Certificado</h1>
-            <p class="cert-texto">Certificamos que</p>
-            <h2 class="cert-nome" id="cert-nome">NOME DO USUÁRIO</h2>
-            <p class="cert-texto">concluiu com êxito o <strong>Treinamento de Conscientização em Segurança da Informação (SOC)</strong>, alcançando a taxa de acertos exigida nas práticas de defesa cibernética corporativa.</p>
-            <div class="cert-footer">
-                <div class="cert-info">
-                    <strong>Aproveitamento</strong>
-                    <p id="cert-taxa">0%</p>
-                </div>
-                <div class="cert-info">
-                    <strong>Data de Emissão</strong>
-                    <p id="cert-data">00/00/0000</p>
-                </div>
-            </div>
-        </div>
-        <div class="botoes-print" style="margin-top: 25px; display: flex; gap: 20px;">
-            <button class="btn-entrar" style="margin: 0; width: auto; padding: 15px 30px; font-size: 1.1em;" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
-            <button class="btn-sair" style="margin: 0; padding: 15px 30px; font-size: 1.1em; border-radius: 10px; background: #e74c3c; color: white;" onclick="fecharCertificado()">✖ Fechar</button>
-        </div>
-    </div>
-
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <script>
     function lancarConfetes() { if(typeof confetti !== 'undefined') confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } }); }
@@ -491,7 +474,7 @@
     }
 
     const InfraBaseDados = {
-        colaboradorAtual: { nome: "Usuário", xp: 0, vidas: 3, sequenciaDias: 0, ultimoAcesso: null, progresso: { Phishing: 0, Senhas: 0, LGPD: 0, Redes: 0 }, questoesRespondidas: 0 },
+        colaboradorAtual: { nome: "Usuário", xp: 0, vidas: 3, sequenciaDias: 0, ultimoAcesso: null, progresso: { Phishing: 0, Senhas: 0, LGPD: 0, Redes: 0 } },
         conquistas: [{ id: 1, nome: "Novato", icone: "🛡️", xpNecessario: 50, d: "Iniciou." },{ id: 2, nome: "Defensor", icone: "🕵️", xpNecessario: 200, d: "200 XP." },{ id: 3, nome: "Mestre", icone: "📜", xpNecessario: 500, d: "500 XP." }],
         salvarProgresso: function() {
             let r = JSON.parse(localStorage.getItem('rankingEmpresa')) || [{ nome: "tiago.souza", xp: 150 }, { nome: "maria.silva", xp: 90 }];
@@ -594,7 +577,12 @@
         }
     }
 
-    function toggleSidebar() { document.getElementById('menu-lateral').classList.toggle('recolhido'); }
+    function toggleSidebar() { 
+        const menuLateral = document.getElementById('menu-lateral');
+        menuLateral.classList.toggle('recolhido'); 
+        // A lógica de mover o mascote com o menu foi removida, pois ele agora está fixo na direita!
+    }
+    
     function toggleSubmenuFases() { const submenu = document.getElementById('submenu-fases'); submenu.style.display = (submenu.style.display === 'none' || submenu.style.display === '') ? 'flex' : 'none'; }
 
     function acessarSistema() {
@@ -611,6 +599,9 @@
 
         document.getElementById('tela-login').style.display = "none"; document.getElementById('tela-plataforma').style.display = "flex";
         
+        const mascote = document.getElementById('mascote-bahianainho');
+        mascote.style.display = "block"; // Revela o mascote
+
         if (e.includes('soc')) { 
             document.getElementById('painel-soc').classList.add('ativo'); document.getElementById('painel-colaborador').classList.remove('ativo'); document.getElementById('menu-lateral').style.display = 'none'; document.getElementById('logo-header-soc').style.display = 'flex'; document.getElementById('btn-toggle-sidebar').style.display = 'none'; atualizarPainelSOC(); 
         } else { 
@@ -693,6 +684,7 @@
         document.getElementById('nome-plataforma-superior').innerText = "SOC Education";
         document.getElementById('tela-plataforma').style.display = "none"; document.getElementById('tela-cadeado').style.display = "block"; document.getElementById('input-email').value = ""; document.getElementById('input-senha').value = ""; 
         document.getElementById('btn-toggle-sidebar').style.display = 'none'; document.getElementById('submenu-fases').style.display = 'none'; document.getElementById('escudo-menu-lateral').innerHTML = ''; 
+        document.getElementById('mascote-bahianainho').style.display = 'none'; // Esconde o mascote ao sair
         alternarAbaColaborador('missoes'); voltarParaMenu();
     }
     
@@ -705,37 +697,7 @@
     }
 
     function atualizarInterfaceColaborador() { document.getElementById('exibir-xp').innerText = "🏆 " + InfraBaseDados.colaboradorAtual.xp + " XP"; document.getElementById('exibir-vidas').innerText = "❤️ " + InfraBaseDados.colaboradorAtual.vidas + " Escudos"; document.getElementById('exibir-ofensiva').innerText = "🔥 " + InfraBaseDados.colaboradorAtual.sequenciaDias + " Dia(s)"; atualizarPainelProgresso(); }
-    
-    function atualizarPainelProgresso() { 
-        const xp = InfraBaseDados.colaboradorAtual.xp; 
-        const sN = ModuloGamificacao.calcularNivelAtual(xp); 
-        document.getElementById('titulo-nivel').innerText = sN.titulo; 
-        document.getElementById('barra-progresso-xp').style.width = sN.porcentagem + "%"; 
-        document.getElementById('barra-progresso-xp').innerText = sN.porcentagem + "%"; 
-        const area = document.getElementById('area-conquistas'); 
-        area.innerHTML = ""; 
-        InfraBaseDados.conquistas.forEach(c => { 
-            const d = xp >= c.xpNecessario; 
-            area.innerHTML += `<div class="cartao-conquista ${d ? 'desbloqueada' : ''}"><span class="icone-conquista">${c.icone}</span><strong>${c.nome}</strong><small>${d ? 'Liberado' : c.xpNecessario+'XP'}</small></div>`; 
-        }); 
-
-        // NOVO: Verifica progresso para o certificado
-        const p = InfraBaseDados.colaboradorAtual.progresso;
-        const acertosTotais = p.Phishing + p.Senhas + p.LGPD + p.Redes;
-        const resp = InfraBaseDados.colaboradorAtual.questoesRespondidas || acertosTotais;
-        const taxa = resp > 0 ? (acertosTotais / resp) : 0;
-        
-        let btnExistente = document.getElementById('area-btn-certificado');
-        if(acertosTotais >= 40) {
-            if(!btnExistente) {
-                if(taxa >= 0.8) {
-                    document.getElementById('aba-progresso').innerHTML += `<div id="area-btn-certificado" style="text-align:center; margin-top:40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><button class="btn-entrar" style="width: auto; padding: 15px 40px; font-size: 1.2em; background: linear-gradient(to right, #f1c40f, #f39c12); box-shadow: 0 10px 20px rgba(243, 156, 18, 0.4);" onclick="gerarCertificado()">🎓 Emitir Certificado de Conclusão</button></div>`;
-                } else {
-                    document.getElementById('aba-progresso').innerHTML += `<div id="area-btn-certificado" style="text-align:center; margin-top:40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><p style="color:#ff7675; font-weight:bold;">Treinamento concluído! Seu aproveitamento foi de ${(taxa*100).toFixed(1)}%. São necessários 80% para o certificado.</p></div>`;
-                }
-            }
-        }
-    }
+    function atualizarPainelProgresso() { const xp = InfraBaseDados.colaboradorAtual.xp; const sN = ModuloGamificacao.calcularNivelAtual(xp); document.getElementById('titulo-nivel').innerText = sN.titulo; document.getElementById('barra-progresso-xp').style.width = sN.porcentagem + "%"; document.getElementById('barra-progresso-xp').innerText = sN.porcentagem + "%"; const area = document.getElementById('area-conquistas'); area.innerHTML = ""; InfraBaseDados.conquistas.forEach(c => { const d = xp >= c.xpNecessario; area.innerHTML += `<div class="cartao-conquista ${d ? 'desbloqueada' : ''}"><span class="icone-conquista">${c.icone}</span><strong>${c.nome}</strong><small>${d ? 'Liberado' : c.xpNecessario+'XP'}</small></div>`; }); }
 
     function iniciarMissaoMenu(tema) { if(document.getElementById('menu-lat-' + tema).classList.contains('bloqueada')) { alert("Fase bloqueada!"); return; } alternarAbaColaborador('missoes'); document.getElementById('texto-intro-missao').style.display = 'none'; iniciarMissao(tema); }
     function voltarParaMenu() { document.getElementById('texto-intro-missao').style.display = 'block'; document.getElementById('area-missao').style.textAlign = 'center'; document.getElementById('area-missao').innerHTML = '<p style="color: #dcdde1; font-size: 1.2em; margin-top: 40px;">👈 Selecione uma fase no menu lateral para iniciar sua missão.</p>'; }
@@ -759,18 +721,23 @@
             });
             h += `</div><div style="display:flex; justify-content:space-between; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><button class="btn-aba" style="background: rgba(255,255,255,0.1); color: white;" onclick="voltarParaMenu()">⬅ Anterior (Voltar)</button><button class="btn-aba" style="background: rgba(255,255,255,0.1); color: white;" onclick="iniciarMissao('${t}')">Recarregar Pergunta ➡</button></div>`;
             area.innerHTML = h;
-        }, 400); 
+        }, 400);
     }
 
     function validarResposta(i) {
-        // REGISTRA A RESPOSTA (Acerto ou Erro)
-        InfraBaseDados.colaboradorAtual.questoesRespondidas = (InfraBaseDados.colaboradorAtual.questoesRespondidas || 0) + 1;
-
         if(i === window.perguntaAtiva.correta) { 
             InfraBaseDados.colaboradorAtual.xp += ModuloGamificacao.calcularXPExponencial(window.perguntaAtiva.dificuldade || 1); 
             InfraBaseDados.colaboradorAtual.progresso[window.temaAtual]++; 
             lancarConfetes(); 
             document.getElementById('area-missao').innerHTML = `<h3 style="color:#2ecc71;">✅ Correto! Você tem ${InfraBaseDados.colaboradorAtual.progresso[window.temaAtual]}/10 completas.</h3>`; 
+            
+            // --- NOVA LÓGICA DE PULO DO MASCOTE ---
+            const mascote = document.getElementById('mascote-bahianainho');
+            mascote.classList.remove('mascote-pulando');
+            void mascote.offsetWidth; // Isso força o navegador a recarregar a animação (importante se acertar duas seguidas!)
+            mascote.classList.add('mascote-pulando');
+            // --------------------------------------
+
         } else { 
             InfraBaseDados.colaboradorAtual.vidas -= 1; 
             document.getElementById('area-missao').innerHTML = `<h3 style='color:#ff7675;'>❌ Errado! Você perdeu 1 Escudo.</h3>`; 
@@ -779,44 +746,14 @@
         InfraBaseDados.salvarProgresso(); 
         atualizarInterfaceColaborador(); 
         verificarFasesDesbloqueadas(); 
-
-        const p = InfraBaseDados.colaboradorAtual.progresso;
-        const acertosTotais = p.Phishing + p.Senhas + p.LGPD + p.Redes;
-        const resp = InfraBaseDados.colaboradorAtual.questoesRespondidas || acertosTotais;
-        const taxa = resp > 0 ? (acertosTotais / resp) : 0;
         
         if (InfraBaseDados.colaboradorAtual.progresso[window.temaAtual] < 10) {
             document.getElementById('area-missao').innerHTML += `<div style="display:flex; justify-content:space-between; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><button class="btn-aba" style="background: rgba(255,255,255,0.1); color: white;" onclick="voltarParaMenu()">⬅ Menu</button><button class="btn-entrar" style="width: auto; margin-top: 0; padding: 10px 30px;" onclick="iniciarMissao('${window.temaAtual}')">Próxima ➡</button></div>`;
-        } else if (acertosTotais >= 40 && taxa >= 0.8) {
-            document.getElementById('area-missao').innerHTML += `<div style="display:flex; justify-content:center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><button class="btn-entrar" style="width: auto; margin-top: 0; padding: 15px 40px; background: linear-gradient(to right, #f1c40f, #f39c12); font-size: 1.1em;" onclick="gerarCertificado()">🎓 Gerar Certificado Oficial</button></div>`;
-        } else if (acertosTotais >= 40 && taxa < 0.8) {
-            document.getElementById('area-missao').innerHTML += `<div style="display:flex; justify-content:center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><p style="color:#ff7675;">Treinamento concluído (Aproveitamento: ${(taxa*100).toFixed(1)}% - Mínimo 80%)</p><br><button class="btn-aba" style="background: rgba(255,255,255,0.1); color: white;" onclick="voltarParaMenu()">Voltar ao Menu</button></div>`;
         } else {
             document.getElementById('area-missao').innerHTML += `<div style="display:flex; justify-content:center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);"><button class="btn-aba" style="background: rgba(255,255,255,0.1); color: white;" onclick="voltarParaMenu()">🏆 Fase Concluída! Voltar ao Menu</button></div>`;
         }
     }
     
-    // =======================================================
-    // FUNÇÕES DE CERTIFICADO (NOVO)
-    // =======================================================
-    function gerarCertificado() {
-        const p = InfraBaseDados.colaboradorAtual.progresso;
-        const acertosTotais = p.Phishing + p.Senhas + p.LGPD + p.Redes;
-        const resp = InfraBaseDados.colaboradorAtual.questoesRespondidas || acertosTotais;
-        const taxa = resp > 0 ? (acertosTotais / resp) * 100 : 0;
-
-        document.getElementById('cert-nome').innerText = InfraBaseDados.colaboradorAtual.nome;
-        document.getElementById('cert-taxa').innerText = taxa.toFixed(1) + "%";
-        document.getElementById('cert-data').innerText = new Date().toLocaleDateString('pt-BR');
-        
-        document.getElementById('modal-certificado').classList.add('ativo');
-        lancarConfetes();
-    }
-
-    function fecharCertificado() {
-        document.getElementById('modal-certificado').classList.remove('ativo');
-    }
-
     function atualizarPainelSOC() { const r = InfraBaseDados.obterRanking().sort((a,b) => b.xp - a.xp); document.getElementById('corpo-ranking').innerHTML = r.map((c, i) => `<tr><td>${i + 1}º</td><td>${c.nome}</td><td><strong style="color:#2ecc71;">${c.xp} XP</strong></td></tr>`).join(''); }
     async function carregarNoticiasReais() { let conteiner = document.querySelector('.lista-noticias'); try { const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent('https://www.microsoft.com/en-us/security/blog/feed/')}`); const data = await res.json(); if (data.status === 'ok') { conteiner.innerHTML = ''; data.items.slice(0, 5).forEach(n => { let res = n.description.replace(/<[^>]*>?/gm, '').substring(0, 130) + '...'; conteiner.innerHTML += `<a href="${n.link}" target="_blank" class="link-noticia"><div class="item-noticia" style="border-left-color: #3498db;"><span class="data-noticia" style="color:#3498db;">Microsoft Security</span><h4 class="titulo-noticia">${n.title}</h4><p class="resumo-noticia">${res}</p></div></a>`; }); } } catch (e) { conteiner.innerHTML = 'Erro ao carregar notícias.'; } }
 
